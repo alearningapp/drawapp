@@ -5,22 +5,27 @@ import './Draw.css'; // Import the CSS for animations
 const Draw = () => {
   const canvasRef = useRef(null);
   const [isDrawing, setIsDrawing] = useState(false);
-  const [history, setHistory] = useState([]);
+  const [history, setHistory] = useState([]); // Store history of canvas states
   const [redoStack, setRedoStack] = useState([]);
   const [replayActions, setReplayActions] = useState([]);
   const [isReplaying, setIsReplaying] = useState(false);
-  const [selectedColor, setSelectedColor] = useState('black'); // State for selected color
-  const [isColorPickerOpen, setIsColorPickerOpen] = useState(false); // Start with color picker closed
+  const [selectedColor, setSelectedColor] = useState('black'); // Current drawing color
+  const [isColorPickerOpen, setIsColorPickerOpen] = useState(false); // Color picker visibility
+  const [currentPath, setCurrentPath] = useState([]); // Store current path points
 
   const startDrawing = (e) => {
     e.preventDefault();
     setIsDrawing(true);
+    
     const ctx = canvasRef.current.getContext('2d');
     const { offsetX, offsetY } = getOffset(e);
-    ctx.strokeStyle = selectedColor; // Set the stroke color
+    
+    ctx.strokeStyle = selectedColor; // Set stroke color
     ctx.beginPath();
     ctx.moveTo(offsetX, offsetY);
-    recordAction('start', { x: offsetX, y: offsetY });
+    
+    // Start a new path
+    setCurrentPath([{ x: offsetX, y: offsetY, color: selectedColor }]);
   };
 
   const draw = (e) => {
@@ -31,32 +36,41 @@ const Draw = () => {
 
     ctx.lineTo(offsetX, offsetY);
     ctx.stroke();
-    recordAction('draw', { x: offsetX, y: offsetY });
+    
+    // Add the point to the current path
+    setCurrentPath((prev) => [...prev, { x: offsetX, y: offsetY }]);
   };
 
   const stopDrawing = () => {
-    if (!isDrawing) return; // Prevent unnecessary calls
+    if (!isDrawing) return;
     setIsDrawing(false);
+    
     const ctx = canvasRef.current.getContext('2d');
     ctx.closePath();
-    saveHistory(); // Save the current drawing state to history
+    
+    // Record the entire path as a single action
+    recordAction('draw', currentPath);
+    saveHistory(); // Save the current canvas state
+
+    // Reset the current path
+    setCurrentPath([]);
   };
 
   const getOffset = (e) => {
     const rect = canvasRef.current.getBoundingClientRect();
-    const scaleX = canvasRef.current.width / rect.width; // Scale for the width
-    const scaleY = canvasRef.current.height / rect.height; // Scale for the height
+    const scaleX = canvasRef.current.width / rect.width;
+    const scaleY = canvasRef.current.height / rect.height;
     const x = (e.clientX - rect.left) * scaleX;
     const y = (e.clientY - rect.top) * scaleY;
     return { offsetX: x, offsetY: y };
   };
 
-  const recordAction = (actionType, position) => {
-    setReplayActions((prev) => [...prev, { actionType, position }]);
+  const recordAction = (actionType, path) => {
+    setReplayActions((prev) => [...prev, { actionType, path }]);
   };
 
   const saveHistory = () => {
-    const canvas = canvasRef.current; // Get the canvas reference
+    const canvas = canvasRef.current;
     if (canvas) {
       const newHistory = history.concat(canvas.toDataURL());
       setHistory(newHistory);
@@ -84,19 +98,19 @@ const Draw = () => {
   };
 
   const restoreCanvas = (dataURL) => {
-    const canvas = canvasRef.current; // Get the canvas reference
+    const canvas = canvasRef.current;
     if (canvas) {
       const ctx = canvas.getContext('2d');
       const img = new Image();
       img.src = dataURL;
       img.onload = () => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas before drawing
-        ctx.drawImage(img, 0, 0); // Draw the previous state
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0);
       };
     }
   };
 
-  const replayDrawing = () => {
+  const replayDrawing = async () => {
     if (replayActions.length === 0 || isReplaying) return;
 
     setIsReplaying(true);
@@ -104,27 +118,40 @@ const Draw = () => {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.beginPath();
 
-    replayActions.forEach((action, index) => {
-      setTimeout(() => {
-        if (action.actionType === 'draw') {
-          ctx.lineTo(action.position.x, action.position.y);
-          ctx.stroke();
-        } else if (action.actionType === 'start') {
-          ctx.moveTo(action.position.x, action.position.y);
-        }
-      }, index * 50); // Adjust speed of replay here
-    });
+    console.log("Starting replay...");
 
-    setTimeout(() => {
-      setIsReplaying(false);
-    }, replayActions.length * 50); // Reset after replay
+    for (let index = 0; index < replayActions.length; index++) {
+      const action = replayActions[index];
+      await new Promise((resolve) => {
+        setTimeout(async () => {
+          console.log(`Action Index: ${index}, Action: ${action.actionType}, Path: ${JSON.stringify(action.path)}`);
+
+          ctx.strokeStyle = action.path[0].color; // Use the saved color from the path
+          ctx.beginPath();
+          ctx.moveTo(action.path[0].x, action.path[0].y); // Move to the first point of the path
+
+          // Draw each point with a timeout for the replay effect
+          for (const point of action.path) {
+            ctx.lineTo(point.x, point.y);
+            ctx.stroke(); // Stroke the line to show it immediately
+            await new Promise((resolve) => setTimeout(resolve, 50)); // Adjust delay as needed
+          }
+
+          resolve(); // Complete the promise to move to the next action
+        }, 50); // Delay before starting the next action
+      });
+    }
+
+    ctx.closePath(); // Close path after replay
+    console.log("Replay finished.");
+    setIsReplaying(false);
   };
 
   const resetCanvas = () => {
-    const canvas = canvasRef.current; // Get the canvas reference
+    const canvas = canvasRef.current;
     if (canvas) {
       const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
       setHistory([]); // Reset history
       setRedoStack([]); // Reset redo stack
       setReplayActions([]); // Reset replay actions
@@ -132,7 +159,7 @@ const Draw = () => {
   };
 
   useEffect(() => {
-    const canvas = canvasRef.current; // Get the canvas reference
+    const canvas = canvasRef.current;
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
