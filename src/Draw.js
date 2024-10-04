@@ -16,14 +16,15 @@ const Draw = () => {
   const startDrawing = (e) => {
     e.preventDefault();
     setIsDrawing(true);
-    
+
     const ctx = canvasRef.current.getContext('2d');
     const { offsetX, offsetY } = getOffset(e);
-    
+
     ctx.strokeStyle = selectedColor; // Set stroke color
+    ctx.lineWidth = 5; // Set line width
     ctx.beginPath();
     ctx.moveTo(offsetX, offsetY);
-    
+
     // Start a new path
     setCurrentPath([{ x: offsetX, y: offsetY, color: selectedColor }]);
   };
@@ -34,9 +35,10 @@ const Draw = () => {
     const ctx = canvasRef.current.getContext('2d');
     const { offsetX, offsetY } = getOffset(e);
 
+    ctx.strokeStyle = selectedColor; // Ensure the stroke color is the selected color
     ctx.lineTo(offsetX, offsetY);
     ctx.stroke();
-    
+
     // Add the point to the current path
     setCurrentPath((prev) => [...prev, { x: offsetX, y: offsetY }]);
   };
@@ -44,10 +46,10 @@ const Draw = () => {
   const stopDrawing = () => {
     if (!isDrawing) return;
     setIsDrawing(false);
-    
+
     const ctx = canvasRef.current.getContext('2d');
     ctx.closePath();
-    
+
     // Record the entire path as a single action
     recordAction('draw', currentPath);
     saveHistory(); // Save the current canvas state
@@ -118,19 +120,14 @@ const Draw = () => {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.beginPath();
 
-    console.log("Starting replay...");
-
     for (let index = 0; index < replayActions.length; index++) {
       const action = replayActions[index];
       await new Promise((resolve) => {
         setTimeout(async () => {
-          console.log(`Action Index: ${index}, Action: ${action.actionType}, Path: ${JSON.stringify(action.path)}`);
-
           ctx.strokeStyle = action.path[0].color; // Use the saved color from the path
           ctx.beginPath();
           ctx.moveTo(action.path[0].x, action.path[0].y); // Move to the first point of the path
 
-          // Draw each point with a timeout for the replay effect
           for (const point of action.path) {
             ctx.lineTo(point.x, point.y);
             ctx.stroke(); // Stroke the line to show it immediately
@@ -143,7 +140,6 @@ const Draw = () => {
     }
 
     ctx.closePath(); // Close path after replay
-    console.log("Replay finished.");
     setIsReplaying(false);
   };
 
@@ -166,7 +162,7 @@ const Draw = () => {
     const handleResize = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
-      resetCanvas(); // Optional: Uncomment if you want to clear on resize
+      resetCanvas(); // Clear on resize
     };
 
     window.addEventListener('resize', handleResize);
