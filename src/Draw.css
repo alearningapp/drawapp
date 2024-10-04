@@ -15,7 +15,11 @@
 .container {
   display: flex;
   flex-direction: column;
-  height: 100vh; /* Full height of the viewport */
+  position: absolute;
+  top:0;
+  bottom: 0;
+  right:0;
+  left:0;
 }
 
 .canvas {
@@ -28,7 +32,12 @@
 .button-container {
   display: flex;
   justify-content: space-around; /* Space buttons evenly */
-  height: 50px; /* Fixed height for the button container */
+  min-height: 50px; /* Fixed height for the button container */
   background-color: #f0f0f0; /* Optional background color */
   border-top: 1px solid #ccc; /* Optional top border */
+}
+.canvas-wrapper {
+  flex-grow: 1; /* Allow the canvas wrapper to grow and fill available space */
+  position: relative; /* Positioning context for the canvas */
+  overflow: hidden;
 }

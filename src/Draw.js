@@ -175,28 +175,31 @@ const Draw = () => {
   };
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+  const canvas = canvasRef.current;
+  const wrapper = canvas.parentElement; // Get the parent wrapper
 
-    const handleResize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      resetCanvas();
-    };
+  // Set canvas dimensions based on the wrapper's size
+  canvas.width = wrapper.clientWidth;
+  canvas.height = wrapper.clientHeight;
 
-    canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
-    canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
-    canvas.addEventListener('touchend', handleTouchEnd);
+  const handleResize = () => {
+    canvas.width = wrapper.clientWidth;
+    canvas.height = wrapper.clientHeight;
+    resetCanvas();
+  };
 
-    window.addEventListener('resize', handleResize);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      canvas.removeEventListener('touchstart', handleTouchStart);
-      canvas.removeEventListener('touchmove', handleTouchMove);
-      canvas.removeEventListener('touchend', handleTouchEnd);
-    };
-  }, []);
+  canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+  canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+  canvas.addEventListener('touchend', handleTouchEnd);
+
+  window.addEventListener('resize', handleResize);
+  return () => {
+    window.removeEventListener('resize', handleResize);
+    canvas.removeEventListener('touchstart', handleTouchStart);
+    canvas.removeEventListener('touchmove', handleTouchMove);
+    canvas.removeEventListener('touchend', handleTouchEnd);
+  };
+}, []);
 
   return (
     <div className="container">
@@ -205,14 +208,16 @@ const Draw = () => {
           <ColorPicker selectedColor={selectedColor} onChange={setSelectedColor} />
         </div>
       )}
-      <canvas
-        ref={canvasRef}
-        className="canvas"
-        onMouseDown={startDrawing}
-        onMouseMove={draw}
-        onMouseUp={stopDrawing}
-        onMouseLeave={stopDrawing}
-      />
+      <div className="canvas-wrapper">
+        <canvas
+          ref={canvasRef}
+          className="canvas"
+          onMouseDown={startDrawing}
+          onMouseMove={draw}
+          onMouseUp={stopDrawing}
+          onMouseLeave={stopDrawing}
+        />
+      </div>
       <div className="button-container">
         <button onClick={undo} disabled={history.length === 0}>Undo</button>
         <button onClick={redo} disabled={redoStack.length === 0}>Redo</button>
