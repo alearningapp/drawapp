@@ -9,3 +9,26 @@
 .color-picker.slide-in {
   left: 10px; /* Final position when shown */
 }
+/* Draw.css */
+/* Draw.css */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* Full height of the viewport */
+}
+
+.canvas {
+  flex: 1; /* Allow the canvas to grow and fill available space */
+  border: 1px solid black;
+  cursor: crosshair;
+  touch-action: none; /* Prevent default touch actions */
+}
+
+.button-container {
+  display: flex;
+  justify-content: space-around; /* Space buttons evenly */
+  height: 50px; /* Fixed height for the button container */
+  background-color: #f0f0f0; /* Optional background color */
+  border-top: 1px solid #ccc; /* Optional top border */
+}

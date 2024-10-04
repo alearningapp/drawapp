@@ -4,57 +4,53 @@ import './Draw.css'; // Import the CSS for animations
 
 const Draw = () => {
   const canvasRef = useRef(null);
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [history, setHistory] = useState([]); // Store history of canvas states
+  const isDrawingRef = useRef(false);
+  const [history, setHistory] = useState([]);
   const [redoStack, setRedoStack] = useState([]);
   const [replayActions, setReplayActions] = useState([]);
   const [isReplaying, setIsReplaying] = useState(false);
-  const [selectedColor, setSelectedColor] = useState('black'); // Current drawing color
-  const [isColorPickerOpen, setIsColorPickerOpen] = useState(false); // Color picker visibility
-  const [currentPath, setCurrentPath] = useState([]); // Store current path points
+  const [selectedColor, setSelectedColor] = useState('black');
+  const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
+  const [currentPath, setCurrentPath] = useState([]);
 
   const startDrawing = (e) => {
     e.preventDefault();
-    setIsDrawing(true);
+    isDrawingRef.current = true;
 
     const ctx = canvasRef.current.getContext('2d');
     const { offsetX, offsetY } = getOffset(e);
 
-    ctx.strokeStyle = selectedColor; // Set stroke color
-    ctx.lineWidth = 5; // Set line width
+    ctx.strokeStyle = selectedColor;
+    ctx.lineWidth = 5;
     ctx.beginPath();
     ctx.moveTo(offsetX, offsetY);
 
-    // Start a new path
     setCurrentPath([{ x: offsetX, y: offsetY, color: selectedColor }]);
   };
 
   const draw = (e) => {
-    if (!isDrawing) return;
+    if (!isDrawingRef.current) return;
 
     const ctx = canvasRef.current.getContext('2d');
     const { offsetX, offsetY } = getOffset(e);
 
-    ctx.strokeStyle = selectedColor; // Ensure the stroke color is the selected color
+    ctx.strokeStyle = selectedColor;
     ctx.lineTo(offsetX, offsetY);
     ctx.stroke();
 
-    // Add the point to the current path
     setCurrentPath((prev) => [...prev, { x: offsetX, y: offsetY }]);
   };
 
   const stopDrawing = () => {
-    if (!isDrawing) return;
-    setIsDrawing(false);
+    if (!isDrawingRef.current) return;
+    isDrawingRef.current = false;
 
     const ctx = canvasRef.current.getContext('2d');
     ctx.closePath();
 
-    // Record the entire path as a single action
     recordAction('draw', currentPath);
-    saveHistory(); // Save the current canvas state
+    saveHistory();
 
-    // Reset the current path
     setCurrentPath([]);
   };
 
@@ -62,9 +58,33 @@ const Draw = () => {
     const rect = canvasRef.current.getBoundingClientRect();
     const scaleX = canvasRef.current.width / rect.width;
     const scaleY = canvasRef.current.height / rect.height;
-    const x = (e.clientX - rect.left) * scaleX;
-    const y = (e.clientY - rect.top) * scaleY;
+
+    let x, y;
+
+    if (e.touches) {
+      const touch = e.touches[0];
+      x = (touch.clientX - rect.left) * scaleX;
+      y = (touch.clientY - rect.top) * scaleY;
+    } else {
+      x = (e.clientX - rect.left) * scaleX;
+      y = (e.clientY - rect.top) * scaleY;
+    }
+
     return { offsetX: x, offsetY: y };
+  };
+
+  const handleTouchStart = (e) => {
+    e.preventDefault();
+    startDrawing(e);
+  };
+
+  const handleTouchMove = (e) => {
+    e.preventDefault();
+    draw(e);
+  };
+
+  const handleTouchEnd = () => {
+    stopDrawing();
   };
 
   const recordAction = (actionType, path) => {
@@ -76,7 +96,7 @@ const Draw = () => {
     if (canvas) {
       const newHistory = history.concat(canvas.toDataURL());
       setHistory(newHistory);
-      setRedoStack([]); // Clear redo stack on new action
+      setRedoStack([]);
     }
   };
 
@@ -124,22 +144,22 @@ const Draw = () => {
       const action = replayActions[index];
       await new Promise((resolve) => {
         setTimeout(async () => {
-          ctx.strokeStyle = action.path[0].color; // Use the saved color from the path
+          ctx.strokeStyle = action.path[0].color;
           ctx.beginPath();
-          ctx.moveTo(action.path[0].x, action.path[0].y); // Move to the first point of the path
+          ctx.moveTo(action.path[0].x, action.path[0].y);
 
           for (const point of action.path) {
             ctx.lineTo(point.x, point.y);
-            ctx.stroke(); // Stroke the line to show it immediately
-            await new Promise((resolve) => setTimeout(resolve, 50)); // Adjust delay as needed
+            ctx.stroke();
+            await new Promise((resolve) => setTimeout(resolve, 50));
           }
 
-          resolve(); // Complete the promise to move to the next action
-        }, 50); // Delay before starting the next action
+          resolve();
+        }, 50);
       });
     }
 
-    ctx.closePath(); // Close path after replay
+    ctx.closePath();
     setIsReplaying(false);
   };
 
@@ -148,9 +168,9 @@ const Draw = () => {
     if (canvas) {
       const ctx = canvas.getContext('2d');
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      setHistory([]); // Reset history
-      setRedoStack([]); // Reset redo stack
-      setReplayActions([]); // Reset replay actions
+      setHistory([]);
+      setRedoStack([]);
+      setReplayActions([]);
     }
   };
 
@@ -162,17 +182,24 @@ const Draw = () => {
     const handleResize = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
-      resetCanvas(); // Clear on resize
+      resetCanvas();
     };
+
+    canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+    canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+    canvas.addEventListener('touchend', handleTouchEnd);
 
     window.addEventListener('resize', handleResize);
     return () => {
       window.removeEventListener('resize', handleResize);
+      canvas.removeEventListener('touchstart', handleTouchStart);
+      canvas.removeEventListener('touchmove', handleTouchMove);
+      canvas.removeEventListener('touchend', handleTouchEnd);
     };
   }, []);
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+    <div className="container">
       {isColorPickerOpen && (
         <div className={`color-picker ${isColorPickerOpen ? 'slide-in' : ''}`}>
           <ColorPicker selectedColor={selectedColor} onChange={setSelectedColor} />
@@ -180,16 +207,13 @@ const Draw = () => {
       )}
       <canvas
         ref={canvasRef}
+        className="canvas"
         onMouseDown={startDrawing}
         onMouseMove={draw}
         onMouseUp={stopDrawing}
         onMouseLeave={stopDrawing}
-        onTouchStart={startDrawing}
-        onTouchMove={draw}
-        onTouchEnd={stopDrawing}
-        style={{ border: '1px solid black', cursor: 'crosshair', touchAction: 'none', width: '100%', height: '100%' }}
       />
-      <div>
+      <div className="button-container">
         <button onClick={undo} disabled={history.length === 0}>Undo</button>
         <button onClick={redo} disabled={redoStack.length === 0}>Redo</button>
         <button onClick={replayDrawing} disabled={isReplaying || replayActions.length === 0}>Replay</button>
