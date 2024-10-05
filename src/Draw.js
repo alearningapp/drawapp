@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState,useCallback } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import ColorPicker from './ColorPicker'; // Import the ColorPicker component
 import ButtonContainer from './ButtonContainer'; // Import the ButtonContainer component
 import './Draw.css'; // Import the CSS for animations
@@ -21,7 +21,8 @@ const Draw = () => {
     const ctx = canvasRef.current.getContext('2d');
     const { offsetX, offsetY } = getOffset(e);
 
-    ctx.strokeStyle = selectedColor;
+    // Use the latest selected color
+    ctx.strokeStyle = selectedColor; 
     ctx.lineWidth = 5;
     ctx.beginPath();
     ctx.moveTo(offsetX, offsetY);
@@ -188,14 +189,20 @@ const Draw = () => {
       canvas.height = wrapper.clientHeight;
       resetCanvas();
     };
+    window.addEventListener('resize', handleResize);
+    return ()=>{
+      window.removeEventListener('resize', handleResize);
+    }
+},[]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
 
     canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
     canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
     canvas.addEventListener('touchend', handleTouchEnd);
 
-    window.addEventListener('resize', handleResize);
     return () => {
-      window.removeEventListener('resize', handleResize);
       canvas.removeEventListener('touchstart', handleTouchStart);
       canvas.removeEventListener('touchmove', handleTouchMove);
       canvas.removeEventListener('touchend', handleTouchEnd);
