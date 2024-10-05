@@ -201,18 +201,12 @@ const Draw = () => {
       canvas.removeEventListener('touchend', handleTouchEnd);
     };
   }, [selectedColor]);
-  const dsetSelectedColor = (color)=>{
-    console.error(color);
-    setSelectedColor(""+color);
-    console.error('selectedColor',selectedColor);
-    setTimeout(()=>console.error(selectedColor),1000)
-  }
 
   return (
     <div className="container">
       {isColorPickerOpen && (
         <div className={`color-picker ${isColorPickerOpen ? 'slide-in' : ''}`}>
-          <ColorPicker selectedColor={selectedColor} onChange={dsetSelectedColor} />
+          <ColorPicker selectedColor={selectedColor} onChange={setSelectedColor} />
         </div>
       )}
       <div className="canvas-wrapper">
