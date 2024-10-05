@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import ColorPicker from './ColorPicker'; // Import the ColorPicker component
+import ButtonContainer from './ButtonContainer'; // Import the ButtonContainer component
 import './Draw.css'; // Import the CSS for animations
 
 const Draw = () => {
@@ -175,31 +176,31 @@ const Draw = () => {
   };
 
   useEffect(() => {
-  const canvas = canvasRef.current;
-  const wrapper = canvas.parentElement; // Get the parent wrapper
+    const canvas = canvasRef.current;
+    const wrapper = canvas.parentElement; // Get the parent wrapper
 
-  // Set canvas dimensions based on the wrapper's size
-  canvas.width = wrapper.clientWidth;
-  canvas.height = wrapper.clientHeight;
-
-  const handleResize = () => {
+    // Set canvas dimensions based on the wrapper's size
     canvas.width = wrapper.clientWidth;
     canvas.height = wrapper.clientHeight;
-    resetCanvas();
-  };
 
-  canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
-  canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
-  canvas.addEventListener('touchend', handleTouchEnd);
+    const handleResize = () => {
+      canvas.width = wrapper.clientWidth;
+      canvas.height = wrapper.clientHeight;
+      resetCanvas();
+    };
 
-  window.addEventListener('resize', handleResize);
-  return () => {
-    window.removeEventListener('resize', handleResize);
-    canvas.removeEventListener('touchstart', handleTouchStart);
-    canvas.removeEventListener('touchmove', handleTouchMove);
-    canvas.removeEventListener('touchend', handleTouchEnd);
-  };
-}, []);
+    canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+    canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+    canvas.addEventListener('touchend', handleTouchEnd);
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      canvas.removeEventListener('touchstart', handleTouchStart);
+      canvas.removeEventListener('touchmove', handleTouchMove);
+      canvas.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, []);
 
   return (
     <div className="container">
@@ -218,15 +219,18 @@ const Draw = () => {
           onMouseLeave={stopDrawing}
         />
       </div>
-      <div className="button-container">
-        <button onClick={undo} disabled={history.length === 0}>Undo</button>
-        <button onClick={redo} disabled={redoStack.length === 0}>Redo</button>
-        <button onClick={replayDrawing} disabled={isReplaying || replayActions.length === 0}>Replay</button>
-        <button onClick={resetCanvas}>Reset</button>
-        <button onClick={() => setIsColorPickerOpen(!isColorPickerOpen)}>
-          {isColorPickerOpen ? 'Hide Colors' : 'Show Colors'}
-        </button>
-      </div>
+      <ButtonContainer 
+        undo={undo}
+        redo={redo}
+        replayDrawing={replayDrawing}
+        resetCanvas={resetCanvas}
+        isColorPickerOpen={isColorPickerOpen}
+        setIsColorPickerOpen={setIsColorPickerOpen}
+        history={history}
+        redoStack={redoStack}
+        isReplaying={isReplaying}
+        replayActions={replayActions}
+      />
     </div>
   );
 };
