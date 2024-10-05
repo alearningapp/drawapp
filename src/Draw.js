@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState,useCallback } from 'react';
 import ColorPicker from './ColorPicker'; // Import the ColorPicker component
 import ButtonContainer from './ButtonContainer'; // Import the ButtonContainer component
 import './Draw.css'; // Import the CSS for animations
@@ -14,7 +14,7 @@ const Draw = () => {
   const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
   const [currentPath, setCurrentPath] = useState([]);
 
-  const startDrawing = (e) => {
+  const startDrawing = useCallback((e) => {
     e.preventDefault();
     isDrawingRef.current = true;
 
@@ -27,7 +27,7 @@ const Draw = () => {
     ctx.moveTo(offsetX, offsetY);
 
     setCurrentPath([{ x: offsetX, y: offsetY, color: selectedColor }]);
-  };
+  },[selectedColor]);
 
   const draw = (e) => {
     if (!isDrawingRef.current) return;
@@ -200,13 +200,19 @@ const Draw = () => {
       canvas.removeEventListener('touchmove', handleTouchMove);
       canvas.removeEventListener('touchend', handleTouchEnd);
     };
-  }, []);
+  }, [selectedColor]);
+  const dsetSelectedColor = (color)=>{
+    console.error(color);
+    setSelectedColor(""+color);
+    console.error('selectedColor',selectedColor);
+    setTimeout(()=>console.error(selectedColor),1000)
+  }
 
   return (
     <div className="container">
       {isColorPickerOpen && (
         <div className={`color-picker ${isColorPickerOpen ? 'slide-in' : ''}`}>
-          <ColorPicker selectedColor={selectedColor} onChange={setSelectedColor} />
+          <ColorPicker selectedColor={selectedColor} onChange={dsetSelectedColor} />
         </div>
       )}
       <div className="canvas-wrapper">
