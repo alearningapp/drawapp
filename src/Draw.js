@@ -12,6 +12,7 @@ const Draw = () => {
     const [selectedColor, setSelectedColor] = useState('black');
     const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
     const [currentPath, setCurrentPath] = useState([]);
+    const [penWidth, setPenWidth] = useState(5); // New state for line width
 
     const startDrawing = useCallback((e) => {
         e.preventDefault();
@@ -21,12 +22,12 @@ const Draw = () => {
         const { offsetX, offsetY } = getOffset(e);
 
         ctx.strokeStyle = selectedColor;
-        ctx.lineWidth = 5;
+        ctx.lineWidth = penWidth; // Use penWidth here
         ctx.beginPath();
         ctx.moveTo(offsetX, offsetY);
 
         setCurrentPath([{ x: offsetX, y: offsetY }]); // Only store the points
-    }, [selectedColor]);
+    }, [selectedColor, penWidth]); // Add penWidth to dependencies
 
     const draw = (e) => {
         if (!isDrawingRef.current) return;
@@ -35,6 +36,7 @@ const Draw = () => {
         const { offsetX, offsetY } = getOffset(e);
 
         ctx.strokeStyle = selectedColor;
+        ctx.lineWidth = penWidth; // Use penWidth here
         ctx.lineTo(offsetX, offsetY);
         ctx.stroke();
 
@@ -49,7 +51,7 @@ const Draw = () => {
         ctx.closePath();
 
         // Record and save the current action immediately
-        const newAction = { color: selectedColor, points: currentPath };
+        const newAction = { color: selectedColor, points: currentPath, width: penWidth }; // Save width as well
         saveAction(newAction); // Save the current action
 
         setCurrentPath([]);
@@ -119,11 +121,12 @@ const Draw = () => {
 
         // Loop through the actions up to the newIndex
         for (let i = 0; i <= newIndex; i++) {
-            const { color, points } = actions[i]; // Destructure color and points
+            const { color, points, width } = actions[i]; // Destructure color, points, and width
 
             // Ensure that points is defined
             if (points) {
                 ctx.strokeStyle = color; // Set color from the actions array
+                ctx.lineWidth = width; // Set the line width from the actions array
                 ctx.beginPath();
                 ctx.moveTo(points[0].x, points[0].y); // Move to the starting point
 
@@ -151,6 +154,7 @@ const Draw = () => {
             await new Promise((resolve) => {
                 setTimeout(async () => {
                     ctx.strokeStyle = action.color; // Use color from the action
+                    ctx.lineWidth = action.width; // Use width from the action
                     ctx.beginPath();
                     ctx.moveTo(action.points[0].x, action.points[0].y);
 
@@ -185,7 +189,7 @@ const Draw = () => {
 
         canvas.width = wrapper.clientWidth;
         canvas.height = wrapper.clientHeight;
-        restoreCanvas(currentIndex); // <-- Added here
+        restoreCanvas(currentIndex); // Call to restore canvas
 
         const handleResize = () => {
             const newWidth = wrapper.clientWidth;
@@ -251,6 +255,8 @@ const Draw = () => {
                 actions={actions}
                 currentIndex={currentIndex}
                 isReplaying={isReplaying}
+                penWidth={penWidth} // Pass penWidth to ButtonContainer if needed
+                setPenWidth={setPenWidth} // Pass setPenWidth to update pen width
             />
         </div>
     );
