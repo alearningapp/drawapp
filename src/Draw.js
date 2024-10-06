@@ -90,7 +90,7 @@ const Draw = () => {
 
     const saveAction = (newAction) => {
         setActions((prev) => {
-            const updatedActions = [...prev, newAction]; // Append the new action
+            const updatedActions = [...prev.slice(0, currentIndex + 1), newAction]; // Include actions up to currentIndex
             setCurrentIndex(updatedActions.length - 1); // Update current index
             return updatedActions; // Return the updated actions
         });
