@@ -20,15 +20,13 @@ const Draw = () => {
     const setDrawingStyle = (ctx) => {
         ctx.lineWidth = penWidth;
         ctx.strokeStyle = `rgba(${hexToRgb(selectedColor).r}, ${hexToRgb(selectedColor).g}, ${hexToRgb(selectedColor).b}, ${opacity})`; // Set strokeStyle with RGBA
-        console.error(ctx.strokeStyle);
-        console.error(selectedColor);
         setPenStyle(ctx); // Set pen style
     };
 
     const startDrawing = useCallback((e) => {
         e.preventDefault();
         isDrawingRef.current = true;
-        
+
         // Hide color picker when drawing starts
         setIsColorPickerOpen(false);
 
@@ -247,26 +245,27 @@ const Draw = () => {
         ctx.strokeStyle = `rgba(${hexToRgb(selectedColor).r}, ${hexToRgb(selectedColor).g}, ${hexToRgb(selectedColor).b}, ${opacity})`; // Set strokeStyle
     }, [selectedColor, opacity]);
 
-const hexToRgb = (color) => {
-    // Check if the color is a named CSS color
-    if (typeof color === 'string' && color !== '' && !/^#[0-9A-Fa-f]{6}$/.test(color)) {
-        const tempDiv = document.createElement('div');
-        tempDiv.style.color = color;
-        document.body.appendChild(tempDiv);
-        const rgb = getComputedStyle(tempDiv).color;
-        document.body.removeChild(tempDiv);
-        const rgbArray = rgb.match(/\d+/g); // Extract RGB values
-        return { r: parseInt(rgbArray[0]), g: parseInt(rgbArray[1]), b: parseInt(rgbArray[2]) };
-    }
+    const hexToRgb = (color) => {
+        // Check if the color is a named CSS color
+        if (typeof color === 'string' && color !== '' && !/^#[0-9A-Fa-f]{6}$/.test(color)) {
+            const tempDiv = document.createElement('div');
+            tempDiv.style.color = color;
+            document.body.appendChild(tempDiv);
+            const rgb = getComputedStyle(tempDiv).color;
+            document.body.removeChild(tempDiv);
+            const rgbArray = rgb.match(/\d+/g); // Extract RGB values
+            return { r: parseInt(rgbArray[0]), g: parseInt(rgbArray[1]), b: parseInt(rgbArray[2]) };
+        }
 
-    // If it's a hex color
-    const bigint = parseInt(color.replace('#', ''), 16);
-    const r = (bigint >> 16) & 255;
-    const g = (bigint >> 8) & 255;
-    const b = bigint & 255;
+        // If it's a hex color
+        const bigint = parseInt(color.replace('#', ''), 16);
+        const r = (bigint >> 16) & 255;
+        const g = (bigint >> 8) & 255;
+        const b = bigint & 255;
 
-    return { r, g, b };
-};
+        return { r, g, b };
+    };
+
     return (
         <div className="container">
             {isColorPickerOpen && (
