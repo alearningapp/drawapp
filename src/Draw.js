@@ -1,18 +1,21 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import ColorPicker from './ColorPicker'; // Import the ColorPicker component
 import ButtonContainer from './ButtonContainer'; // Import the ButtonContainer component
+import CanvasSettings from './CanvasSettings'; // Import the CanvasSettings component
 import './Draw.css'; // Import the CSS for animations
 
 const Draw = () => {
     const canvasRef = useRef(null);
     const isDrawingRef = useRef(false);
-    const [actions, setActions] = useState([]); // Single state for both history and replay actions
-    const [currentIndex, setCurrentIndex] = useState(-1); // Track the current index
+    const [actions, setActions] = useState([]);
+    const [currentIndex, setCurrentIndex] = useState(-1);
     const [isReplaying, setIsReplaying] = useState(false);
     const [selectedColor, setSelectedColor] = useState('black');
     const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
     const [currentPath, setCurrentPath] = useState([]);
-    const [penWidth, setPenWidth] = useState(5); // New state for line width
+    const [penWidth, setPenWidth] = useState(5);
+    const [opacity, setOpacity] = useState(1); // New state for opacity
+    const [penType, setPenType] = useState('solid'); // New state for pen type
 
     const startDrawing = useCallback((e) => {
         e.preventDefault();
@@ -22,12 +25,14 @@ const Draw = () => {
         const { offsetX, offsetY } = getOffset(e);
 
         ctx.strokeStyle = selectedColor;
-        ctx.lineWidth = penWidth; // Use penWidth here
+        ctx.lineWidth = penWidth;
+        ctx.globalAlpha = opacity; // Set opacity
+        setPenStyle(ctx); // Set pen style
         ctx.beginPath();
         ctx.moveTo(offsetX, offsetY);
 
-        setCurrentPath([{ x: offsetX, y: offsetY }]); // Only store the points
-    }, [selectedColor, penWidth]); // Add penWidth to dependencies
+        setCurrentPath([{ x: offsetX, y: offsetY }]);
+    }, [selectedColor, penWidth, opacity, penType]); // Add penType to dependencies
 
     const draw = (e) => {
         if (!isDrawingRef.current) return;
@@ -36,11 +41,23 @@ const Draw = () => {
         const { offsetX, offsetY } = getOffset(e);
 
         ctx.strokeStyle = selectedColor;
-        ctx.lineWidth = penWidth; // Use penWidth here
+        ctx.lineWidth = penWidth;
+        ctx.globalAlpha = opacity; // Set opacity
+        setPenStyle(ctx); // Set pen style
         ctx.lineTo(offsetX, offsetY);
         ctx.stroke();
 
-        setCurrentPath((prev) => [...prev, { x: offsetX, y: offsetY }]); // Add points
+        setCurrentPath((prev) => [...prev, { x: offsetX, y: offsetY }]);
+    };
+
+    const setPenStyle = (ctx) => {
+        if (penType === 'dashed') {
+            ctx.setLineDash([5, 5]); // Set dashed line
+        } else if (penType === 'dotted') {
+            ctx.setLineDash([1, 5]); // Set dotted line
+        } else {
+            ctx.setLineDash([]); // Solid line
+        }
     };
 
     const stopDrawing = () => {
@@ -50,9 +67,8 @@ const Draw = () => {
         const ctx = canvasRef.current.getContext('2d');
         ctx.closePath();
 
-        // Record and save the current action immediately
-        const newAction = { color: selectedColor, points: currentPath, width: penWidth }; // Save width as well
-        saveAction(newAction); // Save the current action
+        const newAction = { color: selectedColor, points: currentPath, width: penWidth, opacity, penType }; // Save all parameters
+        saveAction(newAction);
 
         setCurrentPath([]);
     };
@@ -92,17 +108,17 @@ const Draw = () => {
 
     const saveAction = (newAction) => {
         setActions((prev) => {
-            const updatedActions = [...prev.slice(0, currentIndex + 1), newAction]; // Include actions up to currentIndex
-            setCurrentIndex(updatedActions.length - 1); // Update current index
-            return updatedActions; // Return the updated actions
+            const updatedActions = [...prev.slice(0, currentIndex + 1), newAction];
+            setCurrentIndex(updatedActions.length - 1);
+            return updatedActions;
         });
     };
 
     const undo = () => {
-        if (currentIndex > -1) { // Updated condition
+        if (currentIndex > -1) {
             const newIndex = currentIndex - 1;
             setCurrentIndex(newIndex);
-            restoreCanvas(newIndex); // Pass newIndex
+            restoreCanvas(newIndex);
         }
     };
 
@@ -110,29 +126,29 @@ const Draw = () => {
         if (currentIndex < actions.length - 1) {
             const newIndex = currentIndex + 1;
             setCurrentIndex(newIndex);
-            restoreCanvas(newIndex); // Pass newIndex
+            restoreCanvas(newIndex);
         }
     };
 
     const restoreCanvas = (newIndex) => {
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Loop through the actions up to the newIndex
         for (let i = 0; i <= newIndex; i++) {
-            const { color, points, width } = actions[i]; // Destructure color, points, and width
+            const { color, points, width, opacity, penType } = actions[i];
 
-            // Ensure that points is defined
             if (points) {
-                ctx.strokeStyle = color; // Set color from the actions array
-                ctx.lineWidth = width; // Set the line width from the actions array
+                ctx.strokeStyle = color;
+                ctx.lineWidth = width;
+                ctx.globalAlpha = opacity;
+                setPenStyle(ctx); // Set pen style
                 ctx.beginPath();
-                ctx.moveTo(points[0].x, points[0].y); // Move to the starting point
+                ctx.moveTo(points[0].x, points[0].y);
 
                 for (let j = 1; j < points.length; j++) {
                     const point = points[j];
-                    ctx.lineTo(point.x, point.y); // Draw line to each point
+                    ctx.lineTo(point.x, point.y);
                 }
 
                 ctx.stroke();
@@ -153,8 +169,10 @@ const Draw = () => {
             const action = actions[index];
             await new Promise((resolve) => {
                 setTimeout(async () => {
-                    ctx.strokeStyle = action.color; // Use color from the action
-                    ctx.lineWidth = action.width; // Use width from the action
+                    ctx.strokeStyle = action.color;
+                    ctx.lineWidth = action.width;
+                    ctx.globalAlpha = action.opacity; // Use opacity from the action
+                    setPenStyle(ctx); // Set pen style
                     ctx.beginPath();
                     ctx.moveTo(action.points[0].x, action.points[0].y);
 
@@ -178,8 +196,8 @@ const Draw = () => {
         if (canvas) {
             const ctx = canvas.getContext('2d');
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            setActions([]); // Clear actions
-            setCurrentIndex(-1); // Reset index
+            setActions([]);
+            setCurrentIndex(-1);
         }
     };
 
@@ -189,17 +207,15 @@ const Draw = () => {
 
         canvas.width = wrapper.clientWidth;
         canvas.height = wrapper.clientHeight;
-        restoreCanvas(currentIndex); // Call to restore canvas
+        restoreCanvas(currentIndex);
 
         const handleResize = () => {
             const newWidth = wrapper.clientWidth;
             const newHeight = wrapper.clientHeight;
 
-            // Resize canvas
             canvas.width = newWidth;
             canvas.height = newHeight;
 
-            // Restore canvas without clearing actions
             restoreCanvas(currentIndex);
         };
 
@@ -207,7 +223,7 @@ const Draw = () => {
         return () => {
             window.removeEventListener('resize', handleResize);
         };
-    }, [currentIndex]); // Add currentIndex as a dependency
+    }, [currentIndex]);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -225,7 +241,7 @@ const Draw = () => {
 
     useEffect(() => {
         const ctx = canvasRef.current.getContext('2d');
-        ctx.strokeStyle = selectedColor; // Update the strokeStyle when selectedColor changes
+        ctx.strokeStyle = selectedColor;
     }, [selectedColor]);
 
     return (
@@ -235,6 +251,14 @@ const Draw = () => {
                     <ColorPicker selectedColor={selectedColor} onChange={setSelectedColor} />
                 </div>
             )}
+            <CanvasSettings 
+                penWidth={penWidth} 
+                setPenWidth={setPenWidth} 
+                opacity={opacity} 
+                setOpacity={setOpacity} 
+                penType={penType} 
+                setPenType={setPenType} 
+            />
             <div className="canvas-wrapper">
                 <canvas
                     ref={canvasRef}
@@ -255,8 +279,6 @@ const Draw = () => {
                 actions={actions}
                 currentIndex={currentIndex}
                 isReplaying={isReplaying}
-                penWidth={penWidth} // Pass penWidth to ButtonContainer if needed
-                setPenWidth={setPenWidth} // Pass setPenWidth to update pen width
             />
         </div>
     );
