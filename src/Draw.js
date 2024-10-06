@@ -17,17 +17,25 @@ const Draw = () => {
     const [opacity, setOpacity] = useState(1); // New state for opacity
     const [penType, setPenType] = useState('solid'); // New state for pen type
 
+    const setDrawingStyle = (ctx) => {
+        ctx.lineWidth = penWidth;
+        ctx.strokeStyle = `rgba(${hexToRgb(selectedColor).r}, ${hexToRgb(selectedColor).g}, ${hexToRgb(selectedColor).b}, ${opacity})`; // Set strokeStyle with RGBA
+        console.error(ctx.strokeStyle);
+        console.error(selectedColor);
+        setPenStyle(ctx); // Set pen style
+    };
+
     const startDrawing = useCallback((e) => {
         e.preventDefault();
         isDrawingRef.current = true;
+        
+        // Hide color picker when drawing starts
+        setIsColorPickerOpen(false);
 
         const ctx = canvasRef.current.getContext('2d');
         const { offsetX, offsetY } = getOffset(e);
 
-        ctx.strokeStyle = selectedColor;
-        ctx.lineWidth = penWidth;
-        ctx.globalAlpha = opacity; // Set opacity
-        setPenStyle(ctx); // Set pen style
+        setDrawingStyle(ctx); // Set drawing style
         ctx.beginPath();
         ctx.moveTo(offsetX, offsetY);
 
@@ -40,10 +48,7 @@ const Draw = () => {
         const ctx = canvasRef.current.getContext('2d');
         const { offsetX, offsetY } = getOffset(e);
 
-        ctx.strokeStyle = selectedColor;
-        ctx.lineWidth = penWidth;
-        ctx.globalAlpha = opacity; // Set opacity
-        setPenStyle(ctx); // Set pen style
+        // Removed redundant lines
         ctx.lineTo(offsetX, offsetY);
         ctx.stroke();
 
@@ -139,9 +144,8 @@ const Draw = () => {
             const { color, points, width, opacity, penType } = actions[i];
 
             if (points) {
-                ctx.strokeStyle = color;
                 ctx.lineWidth = width;
-                ctx.globalAlpha = opacity;
+                ctx.strokeStyle = `rgba(${hexToRgb(color).r}, ${hexToRgb(color).g}, ${hexToRgb(color).b}, ${opacity})`; // Set strokeStyle with RGBA
                 setPenStyle(ctx); // Set pen style
                 ctx.beginPath();
                 ctx.moveTo(points[0].x, points[0].y);
@@ -169,9 +173,8 @@ const Draw = () => {
             const action = actions[index];
             await new Promise((resolve) => {
                 setTimeout(async () => {
-                    ctx.strokeStyle = action.color;
                     ctx.lineWidth = action.width;
-                    ctx.globalAlpha = action.opacity; // Use opacity from the action
+                    ctx.strokeStyle = `rgba(${hexToRgb(action.color).r}, ${hexToRgb(action.color).g}, ${hexToRgb(action.color).b}, ${action.opacity})`; // Use RGBA for strokeStyle
                     setPenStyle(ctx); // Set pen style
                     ctx.beginPath();
                     ctx.moveTo(action.points[0].x, action.points[0].y);
@@ -241,9 +244,29 @@ const Draw = () => {
 
     useEffect(() => {
         const ctx = canvasRef.current.getContext('2d');
-        ctx.strokeStyle = selectedColor;
-    }, [selectedColor]);
+        ctx.strokeStyle = `rgba(${hexToRgb(selectedColor).r}, ${hexToRgb(selectedColor).g}, ${hexToRgb(selectedColor).b}, ${opacity})`; // Set strokeStyle
+    }, [selectedColor, opacity]);
 
+const hexToRgb = (color) => {
+    // Check if the color is a named CSS color
+    if (typeof color === 'string' && color !== '' && !/^#[0-9A-Fa-f]{6}$/.test(color)) {
+        const tempDiv = document.createElement('div');
+        tempDiv.style.color = color;
+        document.body.appendChild(tempDiv);
+        const rgb = getComputedStyle(tempDiv).color;
+        document.body.removeChild(tempDiv);
+        const rgbArray = rgb.match(/\d+/g); // Extract RGB values
+        return { r: parseInt(rgbArray[0]), g: parseInt(rgbArray[1]), b: parseInt(rgbArray[2]) };
+    }
+
+    // If it's a hex color
+    const bigint = parseInt(color.replace('#', ''), 16);
+    const r = (bigint >> 16) & 255;
+    const g = (bigint >> 8) & 255;
+    const b = bigint & 255;
+
+    return { r, g, b };
+};
     return (
         <div className="container">
             {isColorPickerOpen && (
