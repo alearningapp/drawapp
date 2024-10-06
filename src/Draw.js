@@ -46,7 +46,6 @@ const Draw = () => {
         const ctx = canvasRef.current.getContext('2d');
         const { offsetX, offsetY } = getOffset(e);
 
-        // Removed redundant lines
         ctx.lineTo(offsetX, offsetY);
         ctx.stroke();
 
@@ -273,14 +272,16 @@ const Draw = () => {
                     <ColorPicker selectedColor={selectedColor} onChange={setSelectedColor} />
                 </div>
             )}
-            <CanvasSettings 
-                penWidth={penWidth} 
-                setPenWidth={setPenWidth} 
-                opacity={opacity} 
-                setOpacity={setOpacity} 
-                penType={penType} 
-                setPenType={setPenType} 
-            />
+            {(isColorPickerOpen) && (
+                <CanvasSettings 
+                    penWidth={penWidth} 
+                    setPenWidth={setPenWidth} 
+                    opacity={opacity} 
+                    setOpacity={setOpacity} 
+                    penType={penType} 
+                    setPenType={setPenType} 
+                />
+            )}
             <div className="canvas-wrapper">
                 <canvas
                     ref={canvasRef}
