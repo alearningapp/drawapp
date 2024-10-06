@@ -103,8 +103,8 @@ const Draw = () => {
 
     const undo = () => {
         if (currentIndex.current > -1) {
-            const newIndex = currentIndex.current - 1;
-            restoreCanvas(newIndex);
+            currentIndex.current-- ;
+            restoreCanvas();
         }
     };
 
@@ -116,11 +116,11 @@ const Draw = () => {
         }
     };
 
-    const restoreCanvas = (newIndex) => {
+    const restoreCanvas = () => {
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        for (let i = 0; i <= newIndex; i++) {
+        for (let i = 0; i <= currentIndex.current; i++) {
             const { color, points, width, opacity, penType } = actions[i];
             if (points) {
                 ctx.lineWidth = width;
