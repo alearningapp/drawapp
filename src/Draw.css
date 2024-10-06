@@ -24,7 +24,6 @@
 
 .canvas {
   flex: 1; /* Allow the canvas to grow and fill available space */
-  border: 1px solid black;
   cursor: crosshair;
   touch-action: none; /* Prevent default touch actions */
 }
