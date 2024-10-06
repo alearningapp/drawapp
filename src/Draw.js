@@ -185,18 +185,25 @@ const Draw = () => {
 
         canvas.width = wrapper.clientWidth;
         canvas.height = wrapper.clientHeight;
+        restoreCanvas(currentIndex); // <-- Added here
 
         const handleResize = () => {
-            canvas.width = wrapper.clientWidth;
-            canvas.height = wrapper.clientHeight;
-            resetCanvas();
+            const newWidth = wrapper.clientWidth;
+            const newHeight = wrapper.clientHeight;
+
+            // Resize canvas
+            canvas.width = newWidth;
+            canvas.height = newHeight;
+
+            // Restore canvas without clearing actions
+            restoreCanvas(currentIndex);
         };
 
         window.addEventListener('resize', handleResize);
         return () => {
             window.removeEventListener('resize', handleResize);
         };
-    }, []);
+    }, [currentIndex]); // Add currentIndex as a dependency
 
     useEffect(() => {
         const canvas = canvasRef.current;
