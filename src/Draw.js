@@ -14,7 +14,7 @@ const Draw = () => {
     const canvasRef = useRef(null);
     const isDrawingRef = useRef(false);
     const [actions, setActions] = useState([]);
-    const [currentIndex, setCurrentIndex] = useState(-1);
+    const currentIndex  = useRef(-1);
     const [isReplaying, setIsReplaying] = useState(false);
     const [loopReplay, setLoopReplay] = useState(ReplayState.NORMAL);
     const [selectedColor, setSelectedColor] = useState('black');
@@ -95,16 +95,15 @@ const Draw = () => {
 
     const saveAction = (newAction) => {
         setActions((prev) => {
-            const updatedActions = [...prev.slice(0, currentIndex + 1), newAction];
-            setCurrentIndex(updatedActions.length - 1);
+            const updatedActions = [...prev.slice(0, currentIndex.current + 1), newAction];
+            currentIndex.current=(updatedActions.length - 1);
             return updatedActions;
         });
     };
 
     const undo = () => {
-        if (currentIndex > -1) {
-            const newIndex = currentIndex - 1;
-            setCurrentIndex(newIndex);
+        if (currentIndex.current > -1) {
+            const newIndex = currentIndex.current - 1;
             restoreCanvas(newIndex);
         }
     };
@@ -112,7 +111,7 @@ const Draw = () => {
     const redo = () => {
         if (currentIndex < actions.length - 1) {
             const newIndex = currentIndex + 1;
-            setCurrentIndex(newIndex);
+            currentIndex.current=(newIndex);
             restoreCanvas(newIndex);
         }
     };
@@ -197,7 +196,7 @@ const Draw = () => {
             const ctx = canvas.getContext('2d');
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             setActions([]);
-            setCurrentIndex(-1);
+            currentIndex.current=(-1);
         }
     };
 
