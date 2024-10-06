@@ -4,16 +4,22 @@ import ButtonContainer from './ButtonContainer';
 import CanvasSettings from './CanvasSettings';
 import './Draw.css';
 
+const ReplayState = {
+    NORMAL: 0,
+    PLAYING: 1,
+    LOOP_PLAYING: 2,
+};
+
 const Draw = () => {
     const canvasRef = useRef(null);
     const isDrawingRef = useRef(false);
     const [actions, setActions] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(-1);
     const [isReplaying, setIsReplaying] = useState(false);
-    const [loopReplay, setLoopReplay] = useState(false);
+    const [loopReplay, setLoopReplay] = useState(ReplayState.NORMAL);
     const [selectedColor, setSelectedColor] = useState('black');
     const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
-    const [currentPath, setCurrentPath] = useState([]);
+    const pointsRef = useRef([]);
     const [penWidth, setPenWidth] = useState(5);
     const [opacity, setOpacity] = useState(1);
     const [penType, setPenType] = useState('solid');
@@ -49,7 +55,7 @@ const Draw = () => {
         setDrawingStyle(ctx);
         ctx.beginPath();
         ctx.moveTo(offsetX, offsetY);
-        setCurrentPath([{ x: offsetX, y: offsetY }]);
+        pointsRef.current=[{ x: offsetX, y: offsetY }];
     }, [selectedColor, penWidth, opacity, penType]);
 
     const draw = (e) => {
@@ -58,17 +64,17 @@ const Draw = () => {
         const { offsetX, offsetY } = getOffset(e);
         ctx.lineTo(offsetX, offsetY);
         ctx.stroke();
-        setCurrentPath((prev) => [...prev, { x: offsetX, y: offsetY }]);
-    };
+        pointsRef.current.push({ x: offsetX, y: offsetY });
+    }
 
     const stopDrawing = () => {
         if (!isDrawingRef.current) return;
         isDrawingRef.current = false;
         const ctx = canvasRef.current.getContext('2d');
         ctx.closePath();
-        const newAction = { color: selectedColor, points: currentPath, width: penWidth, opacity, penType };
+        const newAction = { color: selectedColor, points: pointsRef.current, width: penWidth, opacity, penType };
         saveAction(newAction);
-        setCurrentPath([]);
+        pointsRef.current=[];
     };
 
     const getOffset = (e) => {
@@ -147,7 +153,7 @@ const Draw = () => {
             setPenStyle(ctx);
             
             ctx.beginPath();
-            ctx.moveTo(points[0].x, points[0].y); // Move to the first point
+            ctx.moveTo(points[0].x, points[0].y);
 
             for (let pointIndex = 1; pointIndex < points.length; pointIndex++) {
                 const point = points[pointIndex];
@@ -164,23 +170,26 @@ const Draw = () => {
             ctx.closePath();
         }
 
-        if (loopReplayRef.current) {
+        if (loopReplayRef.current === ReplayState.LOOP_PLAYING) {
             replayTimeoutRef.current = setTimeout(replayDrawing, 1000); // Restart replay after a delay
         } else {
             setIsReplaying(false);
         }
     };
-
     const toggleLoopReplay = () => {
-        if (loopReplay) {
-            clearTimeout(replayTimeoutRef.current);
-            setLoopReplay(false);
-            setIsReplaying(false);
-        } else {
-            setLoopReplay(true);
-            replayDrawing(); // Start replaying
-        }
-    };
+        console.log('de')
+    if (loopReplay === ReplayState.LOOP_PLAYING) {
+        clearTimeout(replayTimeoutRef.current);
+        setLoopReplay(ReplayState.NORMAL);
+        setIsReplaying(false);
+    } else if (loopReplay === ReplayState.NORMAL) {
+        setLoopReplay(ReplayState.PLAYING);
+        replayDrawing(); // Start replaying
+    } else if (loopReplay === ReplayState.PLAYING) {
+        setLoopReplay(ReplayState.LOOP_PLAYING); // Switch to loop playing
+         replayDrawing(); 
+    }
+};
 
     const resetCanvas = () => {
         const canvas = canvasRef.current;

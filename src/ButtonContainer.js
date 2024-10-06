@@ -21,7 +21,7 @@ const ButtonContainer = ({
                 Redo
             </button>
             <button onClick={replayDrawing} >
-                {loopReplay ? 'Stop Replay' : 'Replay'}
+                {loopReplay===2 ? 'Loop Replay' :loopReplay==1? 'Play':'Replay'}
             </button>
             <button onClick={resetCanvas}>
                 Reset
