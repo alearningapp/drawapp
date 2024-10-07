@@ -16,10 +16,10 @@ const ButtonContainer = ({
 }) => {
     return (
         <div className="button-container">
-            <button onClick={undo} disabled={currentIndex < 0}>
+            <button onClick={undo} disabled={isReplaying || currentIndex < 0}>
                 <FontAwesomeIcon icon={faUndo} /> Undo
             </button>
-            <button onClick={redo} disabled={currentIndex >= actionsLen- 1}>
+            <button onClick={redo} disabled={isReplaying||currentIndex >= actionsLen- 1}>
                 <FontAwesomeIcon icon={faRedo} /> Redo
             </button>
             <button onClick={replayDrawing} disabled={actionsLen==0}>

@@ -212,6 +212,7 @@ const Draw = () => {
 };
 
     const resetCanvas = () => {
+        setIsReplaying(false);
         const canvas = canvasRef.current;
         if (canvas) {
             const ctx = canvas.getContext('2d');
