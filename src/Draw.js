@@ -12,7 +12,7 @@ const ReplayState = {
 
 const Draw = () => {
     const canvasRef = useRef(null);
-    const settingRef = useRef({color:'black',penWidth:5,opacity:1,penType:'solid'});
+    const settingRef = useRef({color:'black',penWidth:5,opacity:1,penType:'solid',isReplaying:false});
     const isDrawingRef = useRef(false);
     const actions = useRef([]);
     const [actionsLen,setActionsLen] = useState(0);
@@ -156,7 +156,7 @@ const Draw = () => {
     };
 
     const replayDrawing = async () => {
-        if (actions.current.length === 0 || isReplaying) return;
+        if (actions.current.length === 0 || settingRef.current.isReplaying) return;
 
         setIsReplaying(true);
         const ctx = canvasRef.current.getContext('2d');
@@ -184,16 +184,18 @@ const Draw = () => {
                         resolve();
                     }, 50); // Adjust the timeout for speed
                 });
+                if(!settingRef.current.isReplaying)break;
             }
 
             ctx.closePath();
+
+            if(!settingRef.current.isReplaying)break;
         }
 
+        setIsReplaying(false);
         if (loopReplayRef.current === ReplayState.LOOP_PLAYING) {
             replayTimeoutRef.current = setTimeout(replayDrawing, 1000); // Restart replay after a delay
-        } else {
-            setIsReplaying(false);
-        }
+        } 
     };
     const toggleLoopReplay = () => {
         console.log('de')
@@ -272,8 +274,9 @@ const Draw = () => {
         settingRef.current.color=selectedColor;
         settingRef.current.opacity=opacity;
         settingRef.current.penWidth=penWidth;
-        settingRef.current.penType=penType
-    }, [selectedColor, opacity,penWidth,penType]);
+        settingRef.current.penType=penType;
+        settingRef.current.isReplaying=isReplaying;
+    }, [selectedColor, opacity,penWidth,penType,isReplaying]);
 
     const hexToRgb = (color) => {
         if (typeof color === 'string' && color !== '' && !/^#[0-9A-Fa-f]{6}$/.test(color)) {
