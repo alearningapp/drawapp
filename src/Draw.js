@@ -184,7 +184,6 @@ const Draw = () => {
                         resolve();
                     }, 50); // Adjust the timeout for speed
                 });
-                if(!settingRef.current.isReplaying)break;
             }
 
             ctx.closePath();
