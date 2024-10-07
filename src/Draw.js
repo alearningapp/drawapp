@@ -9,12 +9,13 @@ const ReplayState = {
     PLAYING: 1,
     LOOP_PLAYING: 2,
 };
+const logger={str:''};
 
 const Draw = () => {
     const canvasRef = useRef(null);
     const isDrawingRef = useRef(false);
-    const [actions, setActions] = useState([]);
-    const currentIndex  = useRef(-1);
+    const actions = useRef([]);
+    const currentIndexRef  = useRef(-1);
     const [isReplaying, setIsReplaying] = useState(false);
     const [loopReplay, setLoopReplay] = useState(ReplayState.NORMAL);
     const [selectedColor, setSelectedColor] = useState('black');
@@ -25,7 +26,9 @@ const Draw = () => {
     const [penType, setPenType] = useState('solid');
     const replayTimeoutRef = useRef(null);
     const loopReplayRef = useRef(loopReplay);
-
+    const offsetXRef = useRef(0);
+    const offsetYRef = useRef(0);
+window.canvaRef=canvasRef;
     useEffect(() => {
         loopReplayRef.current = loopReplay;
     }, [loopReplay]);
@@ -52,26 +55,36 @@ const Draw = () => {
         setIsColorPickerOpen(false);
         const ctx = canvasRef.current.getContext('2d');
         const { offsetX, offsetY } = getOffset(e);
+        offsetXRef.current = offsetX;
+        offsetYRef.current = offsetY;
         setDrawingStyle(ctx);
-        ctx.beginPath();
-        ctx.moveTo(offsetX, offsetY);
+        console.log(logger.str=`ctx.beginPath();ctx.moveTo(${offsetX},${offsetY});`);
         pointsRef.current=[{ x: offsetX, y: offsetY }];
     }, [selectedColor, penWidth, opacity, penType]);
 
     const draw = (e) => {
         if (!isDrawingRef.current) return;
         const ctx = canvasRef.current.getContext('2d');
+        ctx.beginPath();
+        ctx.moveTo(offsetXRef.current, offsetYRef.current);
         const { offsetX, offsetY } = getOffset(e);
+        console.log(ctx.strokeStyle);
         ctx.lineTo(offsetX, offsetY);
+
         ctx.stroke();
         pointsRef.current.push({ x: offsetX, y: offsetY });
+        offsetXRef.current = offsetX;
+        offsetYRef.current = offsetY;
     }
 
     const stopDrawing = () => {
         if (!isDrawingRef.current) return;
         isDrawingRef.current = false;
         const ctx = canvasRef.current.getContext('2d');
+        ctx.stroke();
         ctx.closePath();
+        console.log(logger.str+=`ctx.stroke();ctx.closePath();`);
+        console.log(logger.str);
         const newAction = { color: selectedColor, points: pointsRef.current, width: penWidth, opacity, penType };
         saveAction(newAction);
         pointsRef.current=[];
@@ -94,24 +107,21 @@ const Draw = () => {
     };
 
     const saveAction = (newAction) => {
-        setActions((prev) => {
-            const updatedActions = [...prev.slice(0, currentIndex.current + 1), newAction];
-            currentIndex.current=(updatedActions.length - 1);
-            return updatedActions;
-        });
+    actions.current.slice(0, currentIndexRef.current + 1);
+    actions.current.push(newAction);
     };
 
     const undo = () => {
-        if (currentIndex.current > -1) {
-            currentIndex.current-- ;
+        if (currentIndexRef.current > -1) {
+            currentIndexRef.current-- ;
             restoreCanvas();
         }
     };
 
     const redo = () => {
-        if (currentIndex < actions.length - 1) {
-            const newIndex = currentIndex + 1;
-            currentIndex.current=(newIndex);
+        if (currentIndexRef < actions.current.length - 1) {
+            const newIndex = currentIndexRef + 1;
+            currentIndexRef.current=(newIndex);
             restoreCanvas(newIndex);
         }
     };
@@ -120,8 +130,8 @@ const Draw = () => {
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        for (let i = 0; i <= currentIndex.current; i++) {
-            const { color, points, width, opacity, penType } = actions[i];
+        for (let i = 0; i <= currentIndexRef.current; i++) {
+            const { color, points, width, opacity, penType } = actions.current[i];
             if (points) {
                 ctx.lineWidth = width;
                 ctx.strokeStyle = `rgba(${hexToRgb(color).r}, ${hexToRgb(color).g}, ${hexToRgb(color).b}, ${opacity})`;
@@ -139,28 +149,31 @@ const Draw = () => {
     };
 
     const replayDrawing = async () => {
-        if (actions.length === 0 || isReplaying) return;
+        if (actions.current.length === 0 || isReplaying) return;
 
         setIsReplaying(true);
         const ctx = canvasRef.current.getContext('2d');
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-        for (let index = 0; index < actions.length; index++) {
-            const { color, points, width, opacity } = actions[index];
+        for (let index = 0; index < actions.current.length; index++) {
+            const { color, points, width, opacity } = actions.current[index];
             ctx.lineWidth = width;
             ctx.strokeStyle = `rgba(${hexToRgb(color).r}, ${hexToRgb(color).g}, ${hexToRgb(color).b}, ${opacity})`;
             setPenStyle(ctx);
             
-            ctx.beginPath();
-            ctx.moveTo(points[0].x, points[0].y);
+           let {x,y}=points[0];
 
             for (let pointIndex = 1; pointIndex < points.length; pointIndex++) {
                 const point = points[pointIndex];
 
                 await new Promise((resolve) => {
                     setTimeout(() => {
+                        ctx.beginPath();
+                        ctx.moveTo(x, y);
                         ctx.lineTo(point.x, point.y);
                         ctx.stroke();
+                        x=point.x;
+                        y=point.y;
                         resolve();
                     }, 50); // Adjust the timeout for speed
                 });
@@ -195,8 +208,8 @@ const Draw = () => {
         if (canvas) {
             const ctx = canvas.getContext('2d');
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            setActions([]);
-            currentIndex.current=(-1);
+            actions.current=[];
+            currentIndexRef.current=-1;
         }
     };
 
@@ -205,14 +218,14 @@ const Draw = () => {
         const wrapper = canvas.parentElement;
         canvas.width = wrapper.clientWidth;
         canvas.height = wrapper.clientHeight;
-        restoreCanvas(currentIndex);
+        restoreCanvas();
 
         const handleResize = () => {
             const newWidth = wrapper.clientWidth;
             const newHeight = wrapper.clientHeight;
             canvas.width = newWidth;
             canvas.height = newHeight;
-            restoreCanvas(currentIndex);
+            restoreCanvas();
         };
 
         window.addEventListener('resize', handleResize);
@@ -220,7 +233,7 @@ const Draw = () => {
             window.removeEventListener('resize', handleResize);
             clearTimeout(replayTimeoutRef.current);
         };
-    }, [currentIndex]);
+    }, []);
 
     const handleTouchStart = (e) => {
         startDrawing(e);
@@ -304,7 +317,7 @@ const Draw = () => {
                 isColorPickerOpen={isColorPickerOpen}
                 setIsColorPickerOpen={setIsColorPickerOpen}
                 actions={actions}
-                currentIndex={currentIndex}
+                currentIndex={currentIndexRef.current}
                 isReplaying={isReplaying}
                 loopReplay={loopReplay}
             />

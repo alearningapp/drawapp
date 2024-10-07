@@ -1,4 +1,6 @@
 import React from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUndo, faRedo, faPlay, faPause, faSync, faPalette } from '@fortawesome/free-solid-svg-icons';
 
 const ButtonContainer = ({
     undo,
@@ -15,19 +17,21 @@ const ButtonContainer = ({
     return (
         <div className="button-container">
             <button onClick={undo} disabled={currentIndex < 0}>
-                Undo
+                <FontAwesomeIcon icon={faUndo} /> Undo
             </button>
             <button onClick={redo} disabled={currentIndex >= actions.length - 1}>
-                Redo
+                <FontAwesomeIcon icon={faRedo} /> Redo
             </button>
-            <button onClick={replayDrawing} >
-                {loopReplay===2 ? 'Loop Replay' :loopReplay==1? 'Play':'Replay'}
+            <button onClick={replayDrawing}>
+                <FontAwesomeIcon icon={isReplaying ? faPause : loopReplay === 2 ? faSync : faPlay} /> 
+                {loopReplay === 2 ? ' Loop Replay' : loopReplay === 1 ? ' Play' : ' Replay'}
             </button>
             <button onClick={resetCanvas}>
-                Reset
+                <FontAwesomeIcon icon={faSync} /> Reset
             </button>
             <button onClick={() => setIsColorPickerOpen(!isColorPickerOpen)}>
-                {isColorPickerOpen ? 'Close Color Picker' : 'Open Color Picker'}
+                <FontAwesomeIcon icon={faPalette} /> 
+                {isColorPickerOpen ? ' Setting' : 'Setting'}
             </button>
         </div>
     );
