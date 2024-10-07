@@ -12,6 +12,7 @@ const ReplayState = {
 
 const Draw = () => {
     const canvasRef = useRef(null);
+    const settingRef = useRef({color:'black',penWidth:5,opacity:1,penType:'solid'});
     const isDrawingRef = useRef(false);
     const actions = useRef([]);
     const [actionsLen,setActionsLen] = useState(0);
@@ -34,12 +35,13 @@ const Draw = () => {
     }, [loopReplay]);
 
     const setDrawingStyle = (ctx) => {
-        ctx.lineWidth = penWidth;
-        ctx.strokeStyle = `rgba(${hexToRgb(selectedColor).r}, ${hexToRgb(selectedColor).g}, ${hexToRgb(selectedColor).b}, ${opacity})`;
-        setPenStyle(ctx);
+        const setting = settingRef.current;
+        ctx.lineWidth = setting.penWidth;
+        ctx.strokeStyle = `rgba(${hexToRgb(setting.color).r}, ${hexToRgb(setting.color).g}, ${hexToRgb(setting.color).b}, ${setting.opacity})`;
+        setPenStyle(ctx,setting.penType);
     };
 
-    const setPenStyle = (ctx) => {
+    const setPenStyle = (ctx,penType) => {
         if (penType === 'dashed') {
             ctx.setLineDash([5, 5]);
         } else if (penType === 'dotted') {
@@ -59,7 +61,7 @@ const Draw = () => {
         offsetYRef.current = offsetY;
         setDrawingStyle(ctx);
         pointsRef.current=[{ x: offsetX, y: offsetY }];
-    }, [selectedColor, penWidth, opacity, penType]);
+    },[]) ;
 
     const draw = (e) => {
         if (!isDrawingRef.current) return;
@@ -109,7 +111,6 @@ const Draw = () => {
     setActionsLen(actions.length);
     currentIndexRef.current=actions.current.length-1;
     setCurrentIndex(currentIndexRef.current);
-    console.log('saveAction')
 
 
     };
@@ -268,9 +269,11 @@ const Draw = () => {
     }, [selectedColor]);
 
     useEffect(() => {
-        const ctx = canvasRef.current.getContext('2d');
-        ctx.strokeStyle = `rgba(${hexToRgb(selectedColor).r}, ${hexToRgb(selectedColor).g}, ${hexToRgb(selectedColor).b}, ${opacity})`;
-    }, [selectedColor, opacity]);
+        settingRef.current.color=selectedColor;
+        settingRef.current.opacity=opacity;
+        settingRef.current.penWidth=penWidth;
+        settingRef.current.penType=penType
+    }, [selectedColor, opacity,penWidth,penType]);
 
     const hexToRgb = (color) => {
         if (typeof color === 'string' && color !== '' && !/^#[0-9A-Fa-f]{6}$/.test(color)) {
