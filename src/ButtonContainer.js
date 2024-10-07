@@ -9,7 +9,7 @@ const ButtonContainer = ({
     resetCanvas,
     isColorPickerOpen,
     setIsColorPickerOpen,
-    actions,
+    actionsLen,
     currentIndex,
     isReplaying,
     loopReplay
@@ -19,10 +19,10 @@ const ButtonContainer = ({
             <button onClick={undo} disabled={currentIndex < 0}>
                 <FontAwesomeIcon icon={faUndo} /> Undo
             </button>
-            <button onClick={redo} disabled={currentIndex >= actions.length - 1}>
+            <button onClick={redo} disabled={currentIndex >= actionsLen- 1}>
                 <FontAwesomeIcon icon={faRedo} /> Redo
             </button>
-            <button onClick={replayDrawing}>
+            <button onClick={replayDrawing} disabled={actionsLen==0}>
                 <FontAwesomeIcon icon={isReplaying ? faPause : loopReplay === 2 ? faSync : faPlay} /> 
                 {loopReplay === 2 ? ' Loop Replay' : loopReplay === 1 ? ' Play' : ' Replay'}
             </button>

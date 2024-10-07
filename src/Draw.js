@@ -9,13 +9,14 @@ const ReplayState = {
     PLAYING: 1,
     LOOP_PLAYING: 2,
 };
-const logger={str:''};
 
 const Draw = () => {
     const canvasRef = useRef(null);
     const isDrawingRef = useRef(false);
     const actions = useRef([]);
+    const [actionsLen,setActionsLen] = useState(0);
     const currentIndexRef  = useRef(-1);
+    const [currentIndex,setCurrentIndex]  = useState(-1);
     const [isReplaying, setIsReplaying] = useState(false);
     const [loopReplay, setLoopReplay] = useState(ReplayState.NORMAL);
     const [selectedColor, setSelectedColor] = useState('black');
@@ -28,7 +29,6 @@ const Draw = () => {
     const loopReplayRef = useRef(loopReplay);
     const offsetXRef = useRef(0);
     const offsetYRef = useRef(0);
-window.canvaRef=canvasRef;
     useEffect(() => {
         loopReplayRef.current = loopReplay;
     }, [loopReplay]);
@@ -58,7 +58,6 @@ window.canvaRef=canvasRef;
         offsetXRef.current = offsetX;
         offsetYRef.current = offsetY;
         setDrawingStyle(ctx);
-        console.log(logger.str=`ctx.beginPath();ctx.moveTo(${offsetX},${offsetY});`);
         pointsRef.current=[{ x: offsetX, y: offsetY }];
     }, [selectedColor, penWidth, opacity, penType]);
 
@@ -83,8 +82,6 @@ window.canvaRef=canvasRef;
         const ctx = canvasRef.current.getContext('2d');
         ctx.stroke();
         ctx.closePath();
-        console.log(logger.str+=`ctx.stroke();ctx.closePath();`);
-        console.log(logger.str);
         const newAction = { color: selectedColor, points: pointsRef.current, width: penWidth, opacity, penType };
         saveAction(newAction);
         pointsRef.current=[];
@@ -107,21 +104,30 @@ window.canvaRef=canvasRef;
     };
 
     const saveAction = (newAction) => {
-    actions.current.slice(0, currentIndexRef.current + 1);
+    actions.current.splice(currentIndexRef.current + 1);
     actions.current.push(newAction);
+    setActionsLen(actions.length);
+    currentIndexRef.current=actions.current.length-1;
+    setCurrentIndex(currentIndexRef.current);
+    console.log('saveAction')
+
+
     };
 
     const undo = () => {
         if (currentIndexRef.current > -1) {
             currentIndexRef.current-- ;
+            console.log(currentIndexRef.current)
+            setCurrentIndex(currentIndexRef.current);
             restoreCanvas();
         }
     };
 
     const redo = () => {
-        if (currentIndexRef < actions.current.length - 1) {
-            const newIndex = currentIndexRef + 1;
-            currentIndexRef.current=(newIndex);
+        if (currentIndexRef.current < actions.current.length - 1) {
+            const newIndex = currentIndexRef.current + 1;
+            currentIndexRef.current=newIndex;
+            setCurrentIndex(currentIndexRef.current);
             restoreCanvas(newIndex);
         }
     };
@@ -209,7 +215,9 @@ window.canvaRef=canvasRef;
             const ctx = canvas.getContext('2d');
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             actions.current=[];
+            setActionsLen(actions.current.length);
             currentIndexRef.current=-1;
+            setCurrentIndex(currentIndexRef.current);
         }
     };
 
@@ -316,8 +324,8 @@ window.canvaRef=canvasRef;
                 resetCanvas={resetCanvas}
                 isColorPickerOpen={isColorPickerOpen}
                 setIsColorPickerOpen={setIsColorPickerOpen}
-                actions={actions}
-                currentIndex={currentIndexRef.current}
+                actionsLen={actionsLen}
+                currentIndex={currentIndex}
                 isReplaying={isReplaying}
                 loopReplay={loopReplay}
             />
