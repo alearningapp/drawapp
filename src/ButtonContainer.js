@@ -77,7 +77,7 @@ const ButtonContainer = ({
             </div>
             <button onClick={() => setIsColorPickerOpen(!isColorPickerOpen)}>
                 <FontAwesomeIcon icon={faPalette} /> 
-                {isColorPickerOpen ? ' Setting' : 'Setting'}
+                {isColorPickerOpen ? 'Setting' : 'Setting'}
             </button>
         </div>
     );
