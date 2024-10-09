@@ -16,14 +16,17 @@ const ButtonContainer = ({
     loopReplay
 }) => {
     const [isMoreOpen, setIsMoreOpen] = useState(false);
+    const [confirmReset, setConfirmReset] = useState(false);
 
     const toggleMoreMenu = () => {
         setIsMoreOpen(!isMoreOpen);
+        setConfirmReset(false); // Reset confirmation state when toggling menu
     };
 
     const handleClickOutside = (event) => {
         if (isMoreOpen && !event.target.closest('.more-menu-container') && !event.target.closest('.more-button')) {
             setIsMoreOpen(false);
+            setConfirmReset(false); // Reset confirmation state when clicking outside
         }
     };
 
@@ -34,9 +37,14 @@ const ButtonContainer = ({
         };
     }, [isMoreOpen]);
 
-    const handleMenuItemClick = (callback) => {
-        callback();
-        setIsMoreOpen(false);
+    const handleMenuItemClick = () => {
+        if (confirmReset) {
+            resetCanvas();
+            setIsMoreOpen(false);
+            setConfirmReset(false); // Reset confirmation state after action
+        } else {
+            setConfirmReset(true);
+        }
     };
 
     return (
@@ -57,8 +65,11 @@ const ButtonContainer = ({
                 </button>
                 {isMoreOpen && (
                     <ul className="more-menu">
-                        <li onClick={() => handleMenuItemClick(resetCanvas)}>
-                            <FontAwesomeIcon icon={faTrashAlt} /> Reset
+                        <li
+                            onClick={handleMenuItemClick}
+                            className={confirmReset ? 'confirm-reset' : ''}
+                        >
+                            <FontAwesomeIcon icon={faTrashAlt} /> {confirmReset ? 'Confirm Reset' : 'Reset'}
                         </li>
                         {/* Add more menu items as needed */}
                     </ul>

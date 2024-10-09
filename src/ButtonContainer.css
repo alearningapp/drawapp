@@ -15,10 +15,17 @@
 }
 
 .more-menu li {
+    display: flex;
+    align-items: center;
     padding: 5px 10px;
     cursor: pointer;
 }
 
 .more-menu li:hover {
     background-color: #f0f0f0;
+}
+
+.more-menu li.confirm-reset {
+    background-color: red;
+    color: white;
 }
