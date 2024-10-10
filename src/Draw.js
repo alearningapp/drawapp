@@ -12,6 +12,7 @@ const ReplayState = {
 
 const Draw = () => {
     const canvasRef = useRef(null);
+    const cursorRef = useRef(null);
     const settingRef = useRef({color:'black',penWidth:5,opacity:1,penType:'solid',isReplaying:false});
     const isDrawingRef = useRef(false);
     const actions = useRef([]);
@@ -64,11 +65,14 @@ const Draw = () => {
     },[]) ;
 
     const draw = (e) => {
+        const { offsetX, offsetY } = getOffset(e);
+        const rect = canvasRef.current.getBoundingClientRect();
+        cursorRef.current.style.left = `${offsetX- rect.left}px`;
+        cursorRef.current.style.top = `${offsetY- rect.top}px`;
         if (!isDrawingRef.current) return;
         const ctx = canvasRef.current.getContext('2d');
         ctx.beginPath();
         ctx.moveTo(offsetXRef.current, offsetYRef.current);
-        const { offsetX, offsetY } = getOffset(e);
         console.log(ctx.strokeStyle);
         ctx.lineTo(offsetX, offsetY);
 
@@ -298,7 +302,7 @@ const Draw = () => {
 
     return (
         <div className="container">
-            {isColorPickerOpen && (
+            { (
                 <div className={`color-picker ${isColorPickerOpen ? 'slide-in' : ''}`}>
                     <ColorPicker selectedColor={selectedColor} onChange={setSelectedColor} />
                 </div>
@@ -322,6 +326,7 @@ const Draw = () => {
                     onMouseUp={stopDrawing}
                     onMouseLeave={stopDrawing}
                 />
+            <div class="cursor" style={{color:selectedColor,background:selectedColor}} ref={cursorRef} ></div>
             </div>
             <ButtonContainer 
                 undo={undo}
