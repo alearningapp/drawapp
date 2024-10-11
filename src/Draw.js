@@ -75,8 +75,8 @@ const Draw = () => {
         const cursorHeight = cursorRef.current.offsetHeight;
 
         // Set the cursor position to align its bottom-right corner with the cursor
-        cursorRef.current.style.left = `${offsetX+penWidth/2 }px`;
-        cursorRef.current.style.top = `${offsetY - cursorHeight+penWidth }px`;
+        cursorRef.current.style.left = `${offsetX }px`;
+        cursorRef.current.style.top = `${offsetY  }px`;
 
         if (!isDrawingRef.current) return;
         const ctx = canvasRef.current.getContext('2d');
@@ -333,6 +333,7 @@ const Draw = () => {
                 />
                 <div className="cursor" ref={cursorRef}>
                     <CursorIcon penWidth={penWidth} selectedColor={selectedColor} />
+        <div class="point" style={{width:penWidth,height:penWidth,background:selectedColor}}></div>
                 </div>
             </div>
 
