@@ -100,6 +100,12 @@ const Draw = () => {
         saveAction(newAction);
         pointsRef.current = [];
     };
+    const mouseEnter = ()=>{
+        cursorRef.current.style.display='block';
+    }
+    const mouseLeave = ()=>{
+        cursorRef.current.style.display='none';
+    }
 
     const getOffset = (e) => {
         const rect = canvasRef.current.getBoundingClientRect();
@@ -256,6 +262,7 @@ const Draw = () => {
     }, []);
 
     const handleTouchStart = (e) => {
+        cursorRef.current.style.display='block';
         startDrawing(e);
     };
 
@@ -265,6 +272,7 @@ const Draw = () => {
 
     const handleTouchEnd = () => {
         stopDrawing();
+        cursorRef.current.style.display='none';
     };
 
     useEffect(() => {
@@ -329,11 +337,12 @@ const Draw = () => {
                     onMouseDown={startDrawing}
                     onMouseMove={moveDraw}
                     onMouseUp={stopDrawing}
-                    onMouseLeave={stopDrawing}
+                    onMouseLeave={mouseLeave}
+                    onMouseEnter={mouseEnter}
                 />
                 <div className="cursor" ref={cursorRef}>
                     <CursorIcon penWidth={penWidth} selectedColor={selectedColor} />
-        <div class="point" style={{width:penWidth,height:penWidth,background:selectedColor}}></div>
+        <div className="point" style={{width:penWidth,height:penWidth,background:selectedColor}}></div>
                 </div>
             </div>
 
