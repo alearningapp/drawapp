@@ -13,8 +13,8 @@ const ColorPicker = ({ selectedColor, onChange }) => {
           onClick={() => onChange(color)}
           style={{
             backgroundColor: color,
-            width: '40px',
-            height: '40px',
+            width: '25px',
+            height: '25px',
             margin: '5px',
             cursor: 'pointer',
             border: selectedColor === color ? '2px solid black' : 'none',

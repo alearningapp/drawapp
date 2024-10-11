@@ -72,3 +72,7 @@
   transform: translate(-50%, 50%); /* Center the cursor */
 }
 .cursor svg{z-index: 1000;}
+.canvas.cur{
+  position: absolute;
+  top:0;left: 0;
+}
