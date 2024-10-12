@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import CanvasSettings from './CanvasSettings';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPen } from '@fortawesome/free-solid-svg-icons';
-
+import {getComplementaryColor} from './Util';
 const ColorSelect = ({
   selectedColor,
   setSelectedColor,
@@ -14,7 +14,13 @@ const ColorSelect = ({
   setPenType,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const colors = ['#000000','#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+  const colors = [
+    '#000000', '#ff0000', '#00ff00', '#0000ff', 
+    '#ffff00', '#ff00ff', '#00ffff', '#ffffff', 
+    '#800000', '#808000', '#008000', '#008080', 
+    '#000080', '#800080', '#c0c0c0', '#808080', 
+    '#f0e68c', '#add8e6', '#ffb6c1', '#ffa07a'
+  ];
   const ref = useRef();
 
   const toggleList = () => {
@@ -54,30 +60,24 @@ const ColorSelect = ({
           margin: '5px 0',
           display: 'flex',
         }}
-      ><div style={{background:selectedColor,padding:'10px',borderRadius:'5px'}}></div>
-        <FontAwesomeIcon style={{color:selectedColor,marginLeft:'5px',height:'20px'}} icon={faPen}  />
+      ><div style={{background:selectedColor,border:'1px solid #ccc',padding:'10px',borderRadius:'5px'}}></div>
+        <FontAwesomeIcon style={{color:selectedColor,marginLeft:'5px',height:'20px',backgroundColor:getComplementaryColor(selectedColor)}} icon={faPen}  />
       </div>
       {isOpen && (
-        <div style={{ display: 'flex' }}>
-          <CanvasSettings 
-            penWidth={penWidth} 
-            setPenWidth={setPenWidth} 
-            opacity={opacity} 
-            setOpacity={setOpacity} 
-            penType={penType} 
-            setPenType={setPenType} 
-          />
-          <ul style={{
+        <div style={{ display: 'flex',maxHeight:'calc( 100vh - 150px)' }}>
+          <div>
+                    <ul style={{
             listStyle: 'none',
             padding: '10px',
             margin: '0',
             border: '1px solid #ccc',
-            position: 'absolute',
             backgroundColor: '#fff',
             zIndex: 1000,
             display: 'flex',
             flexDirection: 'column',
             gap: '5px',
+            flexGrow: 1,
+            flexWrap: "wrap"
           }}>
             {colors.map(color => (
               <li
@@ -92,6 +92,16 @@ const ColorSelect = ({
               />
             ))}
           </ul>
+          </div>
+          <CanvasSettings 
+            penWidth={penWidth} 
+            setPenWidth={setPenWidth} 
+            opacity={opacity} 
+            setOpacity={setOpacity} 
+            penType={penType} 
+            setPenType={setPenType} 
+          />
+
         </div>
       )}
     </div>
