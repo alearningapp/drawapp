@@ -1,7 +1,6 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import ColorPicker from './ColorPicker';
 import ButtonContainer from './ButtonContainer';
-import CanvasSettings from './CanvasSettings';
 import CursorIcon from './CursorIcon'; // Import the new CursorIcon component
 import './Draw.css';
 
@@ -315,18 +314,14 @@ const Draw = () => {
     return (
         <div className="container">
     
-            {isColorPickerOpen && (
-                <CanvasSettings 
-                    penWidth={penWidth} 
-                    setPenWidth={setPenWidth} 
-                    opacity={opacity} 
-                    setOpacity={setOpacity} 
-                    penType={penType} 
-                    setPenType={setPenType} 
-                />
-            )}
+
             <div className="canvas-wrapper">
-            <ColorPicker selectedColor={selectedColor} setSelectedColor={setSelectedColor} />
+            <ColorPicker selectedColor={selectedColor} setSelectedColor={setSelectedColor}             penWidth={penWidth} 
+            setPenWidth={setPenWidth} 
+            opacity={opacity} 
+            setOpacity={setOpacity} 
+            penType={penType} 
+            setPenType={setPenType}  />
                 <canvas
                     ref={canvasRef}
                     className="canvas"

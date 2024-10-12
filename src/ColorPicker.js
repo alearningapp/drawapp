@@ -1,9 +1,18 @@
 import React, { useState, useRef, useEffect } from 'react';
+import CanvasSettings from './CanvasSettings';
 
-const ColorSelect = ({ selectedColor, setSelectedColor }) => {
+const ColorSelect = ({
+  selectedColor,
+  setSelectedColor,
+  penWidth,
+  setPenWidth,
+  opacity,
+  setOpacity,
+  penType,
+  setPenType,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+  const colors = ['#000000','#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
   const ref = useRef();
 
   const toggleList = () => {
@@ -28,69 +37,61 @@ const ColorSelect = ({ selectedColor, setSelectedColor }) => {
     };
   }, []);
 
-  const handleMouseDown = (e) => {
-    const offsetX = e.clientX - position.x;
-    const offsetY = e.clientY - position.y;
-
-    const handleMouseMove = (moveEvent) => {
-      setPosition({
-        x: moveEvent.clientX - offsetX,
-        y: moveEvent.clientY - offsetY,
-      });
-    };
-
-    const handleMouseUp = () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-  };
-
   return (
-    <div ref={ref} style={{ position: 'relative', width: '100%', height: '300px', border: '1px solid #ccc' }}>
-      <button
+    <div ref={ref} style={{ position: 'absolute', display: 'flex', flexDirection: 'column' }}>
+      <div
         onClick={toggleList}
-        onMouseDown={handleMouseDown}
         style={{
-          position: 'absolute',
-          left: position.x,
-          top: position.y,
           backgroundColor: selectedColor,
-          color: '#fff',
           padding: '10px',
-          border: 'none',
+          cursor: 'pointer',
           borderRadius: '5px',
-          cursor: 'move',
+          margin: '5px 0',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
         }}
       >
         Select Color
-      </button>
+      </div>
       {isOpen && (
-        <ul style={{
-          listStyle: 'none',
-          padding: '10px',
-          margin: '0',
-          border: '1px solid #ccc',
-          position: 'absolute',
-          backgroundColor: '#fff',
-          zIndex: 1000,
-        }}>
-          {colors.map(color => (
-            <li
-              key={color}
-              onClick={() => handleColorSelect(color)}
-              style={{
-                backgroundColor: color,
-                padding: '10px',
-                cursor: 'pointer',
-                borderRadius: '5px',
-                margin: '5px 0',
-              }}
-            />
-          ))}
-        </ul>
+        <>
+        <div style={{display:'flex'}}>
+          <CanvasSettings 
+            penWidth={penWidth} 
+            setPenWidth={setPenWidth} 
+            opacity={opacity} 
+            setOpacity={setOpacity} 
+            penType={penType} 
+            setPenType={setPenType} 
+          />
+          <ul style={{
+            listStyle: 'none',
+            padding: '10px',
+            margin: '0',
+            border: '1px solid #ccc',
+            position: 'absolute',
+            backgroundColor: '#fff',
+            zIndex: 1000,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '5px',
+          }}>
+            {colors.map(color => (
+              <li
+                key={color}
+                onClick={() => handleColorSelect(color)}
+                style={{
+                  backgroundColor: color,
+                  padding: '10px',
+                  cursor: 'pointer',
+                  borderRadius: '5px',
+                }}
+              />
+            ))}
+          </ul>
+          </div>
+        </>
       )}
     </div>
   );
