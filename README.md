@@ -1,4 +1,8 @@
-# Getting Started with Create React App
+# A Learning App For Kids.
+
+Let your child's creativity shine with the Kids' Draw App! This fun app makes drawing easy and exciting for kids.
+
+[Demo: ALearningApp.com for Kids](htttps://alearningapp.com)
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
