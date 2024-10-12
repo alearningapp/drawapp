@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import CanvasSettings from './CanvasSettings';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPen } from '@fortawesome/free-solid-svg-icons';
 
 const ColorSelect = ({
   selectedColor,
@@ -21,7 +23,6 @@ const ColorSelect = ({
 
   const handleColorSelect = (color) => {
     setSelectedColor(color);
-    setIsOpen(false);
   };
 
   const handleClickOutside = (event) => {
@@ -41,22 +42,23 @@ const ColorSelect = ({
     <div ref={ref} style={{ position: 'absolute', display: 'flex', flexDirection: 'column' }}>
       <div
         onClick={toggleList}
+        role="button"
+        aria-haspopup="true"
+        aria-expanded={isOpen}
+        tabIndex={0}
+        onKeyDown={(e) => e.key === 'Enter' && toggleList()}
         style={{
-          backgroundColor: selectedColor,
           padding: '10px',
           cursor: 'pointer',
           borderRadius: '5px',
           margin: '5px 0',
           display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
         }}
-      >
-        Select Color
+      ><div style={{background:selectedColor,padding:'10px',borderRadius:'5px'}}></div>
+        <FontAwesomeIcon style={{color:selectedColor,marginLeft:'5px',height:'20px'}} icon={faPen}  />
       </div>
       {isOpen && (
-        <>
-        <div style={{display:'flex'}}>
+        <div style={{ display: 'flex' }}>
           <CanvasSettings 
             penWidth={penWidth} 
             setPenWidth={setPenWidth} 
@@ -90,8 +92,7 @@ const ColorSelect = ({
               />
             ))}
           </ul>
-          </div>
-        </>
+        </div>
       )}
     </div>
   );
