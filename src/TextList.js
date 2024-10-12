@@ -8,16 +8,25 @@ const TextList = ({ setText }) => {
     Array.from({ length: 26 }, (_, i) => `${String.fromCharCode(65 + i)}${String.fromCharCode(97 + i)}`)
   );
   const [fruitItems, setFruitItems] = useState([
-    'Apple', 'Banana', 'Cherry', 'Date', 'Elderberry', 'Fig', 'Grape', 
-    'Honeydew', 'Kiwi', 'Lemon', 'Mango', 'Nectarine', 'Orange', 
-    'Papaya', 'Quince', 'Raspberry', 'Strawberry', 'Tangerine', 
-    'Ugli fruit', 'Watermelon'
+    'Apple', 'Banana', 'Cherry', 'Date', 'Elderberry', 'Fig', 
+    'Grape', 'Honeydew', 'Kiwi', 'Lemon', 'Mango', 'Nectarine', 
+    'Orange', 'Papaya', 'Quince', 'Raspberry', 'Strawberry', 
+    'Tangerine', 'Ugli fruit', 'Watermelon', 'Blueberry', 
+    'Pineapple', 'Dragonfruit', 'Pomegranate', 'Coconut', 'Apricot'
   ]);
   const [animalItems, setAnimalItems] = useState([
     'Alligator', 'Bear', 'Cat', 'Dog', 'Elephant', 'Frog', 
     'Giraffe', 'Horse', 'Iguana', 'Jaguar', 'Kangaroo', 
     'Lion', 'Monkey', 'Narwhal', 'Octopus', 'Penguin', 
-    'Quokka', 'Rabbit', 'Shark', 'Tiger', 'Zebra'
+    'Quokka', 'Rabbit', 'Shark', 'Tiger', 'Zebra', 
+    'Dolphin', 'Rhino', 'Squirrel', 'Tortoise', 'Walrus'
+  ]);
+  const [relationshipItems, setRelationshipItems] = useState([
+    'Friend', 'Father', 'Mother', 'Sibling', 'Brother', 
+    'Sister', 'Partner', 'Neighbor', 'Cousin', 'Aunt', 
+    'Uncle', 'Grandfather', 'Grandmother', 'Child', 'Niece', 
+    'Nephew', 'Grandchild', 'Mentor', 'Spouse', 
+    'Fiancé', 'Guardian', 'Classmate', 'Teacher'
   ]);
 
   const containerRef = useRef(null);
@@ -32,6 +41,11 @@ const TextList = ({ setText }) => {
   const addAnimalItem = () => {
     const newItem = `Animal ${animalItems.length + 1}`;
     setAnimalItems([...animalItems, newItem]);
+  };
+
+  const addRelationshipItem = () => {
+    const newItem = `Relationship ${relationshipItems.length + 1}`;
+    setRelationshipItems([...relationshipItems, newItem]);
   };
 
   const handleItemClick = (item) => {
@@ -55,16 +69,16 @@ const TextList = ({ setText }) => {
     };
   }, [containerRef]);
 
-  const renderItems = (items, isAnimal = false) => (
+  const renderItems = (items, isAddButtonVisible = false, addItemFunction) => (
     <div style={styles.scrollableList}>
       {items.map((item, index) => (
         <div key={index} style={styles.listItem} onClick={() => handleItemClick(item)}>
           {item}
         </div>
       ))}
-      {isAnimal && (
-        <button onClick={addAnimalItem} style={styles.addButton}>
-          Add Animal
+      {isAddButtonVisible && (
+        <button onClick={addItemFunction} style={styles.addButton}>
+          Add Item
         </button>
       )}
     </div>
@@ -78,7 +92,7 @@ const TextList = ({ setText }) => {
       {isVisible && (
         <div style={styles.listContainer}>
           <div style={styles.tabs}>
-            {['alphabet', 'fruits', 'animals'].map((tab) => (
+            {['alphabet', 'fruits', 'animals', 'relationships'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -90,8 +104,9 @@ const TextList = ({ setText }) => {
           </div>
           <div style={styles.category}>
             {activeTab === 'alphabet' ? renderItems(alphabetItems) : 
-             activeTab === 'fruits' ? renderItems(fruitItems) : 
-             renderItems(animalItems, true)}
+             activeTab === 'fruits' ? renderItems(fruitItems, true, addFruitItem) : 
+             activeTab === 'animals' ? renderItems(animalItems, true, addAnimalItem) : 
+             renderItems(relationshipItems, true, addRelationshipItem)}
           </div>
         </div>
       )}
