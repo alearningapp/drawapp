@@ -13,14 +13,25 @@ const TextList = ({ setText }) => {
     'Papaya', 'Quince', 'Raspberry', 'Strawberry', 'Tangerine', 
     'Ugli fruit', 'Watermelon'
   ]);
-  
+  const [animalItems, setAnimalItems] = useState([
+    'Alligator', 'Bear', 'Cat', 'Dog', 'Elephant', 'Frog', 
+    'Giraffe', 'Horse', 'Iguana', 'Jaguar', 'Kangaroo', 
+    'Lion', 'Monkey', 'Narwhal', 'Octopus', 'Penguin', 
+    'Quokka', 'Rabbit', 'Shark', 'Tiger', 'Zebra'
+  ]);
+
   const containerRef = useRef(null);
 
   const toggleList = () => setIsVisible(!isVisible);
-  
+
   const addFruitItem = () => {
     const newItem = `Fruit ${fruitItems.length + 1}`;
     setFruitItems([...fruitItems, newItem]);
+  };
+
+  const addAnimalItem = () => {
+    const newItem = `Animal ${animalItems.length + 1}`;
+    setAnimalItems([...animalItems, newItem]);
   };
 
   const handleItemClick = (item) => {
@@ -44,13 +55,18 @@ const TextList = ({ setText }) => {
     };
   }, [containerRef]);
 
-  const renderItems = (items) => (
+  const renderItems = (items, isAnimal = false) => (
     <div style={styles.scrollableList}>
       {items.map((item, index) => (
         <div key={index} style={styles.listItem} onClick={() => handleItemClick(item)}>
           {item}
         </div>
       ))}
+      {isAnimal && (
+        <button onClick={addAnimalItem} style={styles.addButton}>
+          Add Animal
+        </button>
+      )}
     </div>
   );
 
@@ -62,7 +78,7 @@ const TextList = ({ setText }) => {
       {isVisible && (
         <div style={styles.listContainer}>
           <div style={styles.tabs}>
-            {['alphabet', 'fruits'].map((tab) => (
+            {['alphabet', 'fruits', 'animals'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -73,14 +89,9 @@ const TextList = ({ setText }) => {
             ))}
           </div>
           <div style={styles.category}>
-            {activeTab === 'alphabet' ? renderItems(alphabetItems) : (
-              <>
-                {renderItems(fruitItems)}
-                <button onClick={addFruitItem} style={styles.addButton}>
-                  Add Fruit
-                </button>
-              </>
-            )}
+            {activeTab === 'alphabet' ? renderItems(alphabetItems) : 
+             activeTab === 'fruits' ? renderItems(fruitItems) : 
+             renderItems(animalItems, true)}
           </div>
         </div>
       )}
