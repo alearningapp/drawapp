@@ -38,6 +38,11 @@ const ColorSelect = ({
     }
   };
 
+  const handleCustomColorChange = (event) => {
+    const newColor = event.target.value;
+    setSelectedColor(newColor);
+  };
+
   useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
@@ -76,10 +81,10 @@ const ColorSelect = ({
               backgroundColor: '#fff',
               zIndex: 1000,
               display: 'flex',
-              flexDirection: 'row', // Change to row for wrapping
-              flexWrap: 'wrap',     // Enable wrapping
+              flexDirection: 'row',
+              flexWrap: 'wrap',
               gap: '5px',
-              maxWidth: '100px'     // Set a max width to control the wrapping
+              maxWidth: '200px'
             }}>
               {colors.map(color => (
                 <li
@@ -90,11 +95,27 @@ const ColorSelect = ({
                     padding: '10px',
                     cursor: 'pointer',
                     borderRadius: '5px',
-                    flex: '0 0 30%', // Control the size of each item (30% width)
-                    boxSizing: 'border-box', // Ensure padding is included in width
+                    flex: '0 0 30%',
+                    boxSizing: 'border-box',
                   }}
                 />
               ))}
+              {/* Custom Color Input */}
+              <li style={{ padding: '0', flex: '0 0 30%' }}>
+                <input
+                  type="color"
+                  value={selectedColor}
+                  onChange={handleCustomColorChange}
+                  style={{
+                    width: '100%',
+                    height: '40px',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    padding: '0',
+                  }}
+                />
+              </li>
             </ul>
           </div>
           <CanvasSettings 
