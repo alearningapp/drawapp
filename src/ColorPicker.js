@@ -45,6 +45,7 @@ const ColorSelect = ({
 
   useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchend', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
