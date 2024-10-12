@@ -314,11 +314,7 @@ const Draw = () => {
 
     return (
         <div className="container">
-            {(
-                <div className={`color-picker ${isColorPickerOpen ? 'slide-in' : ''}`}>
-                    <ColorPicker selectedColor={selectedColor} onChange={setSelectedColor} />
-                </div>
-            )}
+    
             {isColorPickerOpen && (
                 <CanvasSettings 
                     penWidth={penWidth} 
@@ -330,6 +326,7 @@ const Draw = () => {
                 />
             )}
             <div className="canvas-wrapper">
+            <ColorPicker selectedColor={selectedColor} setSelectedColor={setSelectedColor} />
                 <canvas
                     ref={canvasRef}
                     className="canvas"
