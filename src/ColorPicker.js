@@ -97,6 +97,8 @@ const ColorSelect = ({
                     borderRadius: '5px',
                     flex: '0 0 30%',
                     boxSizing: 'border-box',
+                    border: selectedColor === color ? `2px solid ${color}` : 'none', // Highlight selected color
+                    boxShadow: selectedColor === color ? `0 0 5px ${color}` : 'none' // Optional shadow effect
                   }}
                 />
               ))}
