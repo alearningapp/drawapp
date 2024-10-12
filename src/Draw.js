@@ -3,6 +3,8 @@ import ColorPicker from './ColorPicker';
 import ButtonContainer from './ButtonContainer';
 import CursorIcon from './CursorIcon'; // Import the new CursorIcon component
 import './Draw.css';
+import {hexToRgb} from './Util';
+import TextList from './TextList';
 
 const ReplayState = {
     NORMAL: 0,
@@ -32,6 +34,46 @@ const Draw = () => {
     const offsetXRef = useRef(0);
     const offsetYRef = useRef(0);
 
+    const drawText=(text)=>{
+        const canvas=  canvasRef.current;
+           const ctx = canvas.getContext('2d');
+
+           ctx.clearRect(0, 0, canvas.width, canvas.height);
+           const margin = 10; // Define the margin
+           let fontSize = 10; // Start with a small font size
+           ctx.font = `${fontSize}px Arial`;
+   
+           // Measure the text and increase the font size until it fits within the canvas minus margin
+           while (true) {
+               ctx.font = `${fontSize}px Arial`;
+               const textWidth = ctx.measureText(text).width;
+               const textHeight = fontSize; // Approximate height as fontSize for simplicity
+   
+               // Check if the text exceeds canvas dimensions with margins
+               if (textWidth > (canvas.width - margin * 2) || textHeight > (canvas.height - margin * 2)) {
+                   fontSize--; // Decrease font size if it overflows
+                   break; // Exit the loop
+               }
+   
+               fontSize++; // Increase font size
+           }
+   
+           // Center the text with margin
+           ctx.textAlign = "center";
+           ctx.textBaseline = "middle";
+           const x = canvas.width / 2;
+           const y = canvas.height / 2;
+   
+           // Set opacity
+           ctx.globalAlpha = 0.5;
+   
+           // Draw the text with the margin applied
+           ctx.fillText(text, x, y);
+
+            ctx.globalAlpha = 1.0;
+
+
+    };
     useEffect(() => {
         loopReplayRef.current = loopReplay;
     }, [loopReplay]);
@@ -293,29 +335,12 @@ const Draw = () => {
         settingRef.current.isReplaying = isReplaying;
     }, [selectedColor, opacity, penWidth, penType, isReplaying]);
 
-    const hexToRgb = (color) => {
-        if (typeof color === 'string' && color !== '' && !/^#[0-9A-Fa-f]{6}$/.test(color)) {
-            const tempDiv = document.createElement('div');
-            tempDiv.style.color = color;
-            document.body.appendChild(tempDiv);
-            const rgb = getComputedStyle(tempDiv).color;
-            document.body.removeChild(tempDiv);
-            const rgbArray = rgb.match(/\d+/g);
-            return { r: parseInt(rgbArray[0]), g: parseInt(rgbArray[1]), b: parseInt(rgbArray[2]) };
-        }
-
-        const bigint = parseInt(color.replace('#', ''), 16);
-        const r = (bigint >> 16) & 255;
-        const g = (bigint >> 8) & 255;
-        const b = bigint & 255;
-        return { r, g, b };
-    };
+  
 
     return (
         <div className="container">
-    
-
             <div className="canvas-wrapper">
+            <TextList  setText={drawText} />
             <ColorPicker selectedColor={selectedColor} setSelectedColor={setSelectedColor}             penWidth={penWidth} 
             setPenWidth={setPenWidth} 
             opacity={opacity} 
@@ -331,11 +356,11 @@ const Draw = () => {
                     onMouseLeave={mouseLeave}
                     onMouseEnter={mouseEnter}
                 />
-                <div className="cursor" ref={cursorRef}>
-                    <CursorIcon penWidth={penWidth} selectedColor={selectedColor} />
-        <div className="point" style={{width:penWidth,height:penWidth,background:selectedColor}}></div>
-                </div>
+            <div className="cursor" ref={cursorRef}>
+                <CursorIcon penWidth={penWidth} selectedColor={selectedColor} />
+                <div className="point" style={{width:penWidth,height:penWidth,background:selectedColor}}></div>
             </div>
+        </div>
 
             <ButtonContainer 
                 undo={undo}
