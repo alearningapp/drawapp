@@ -11,7 +11,7 @@ const CanvasSettings = ({ penWidth, setPenWidth, opacity, setOpacity, penType, s
     }[penType] || faPen;
 
     return (
-        <div className="canvas-settings">
+        <div className="canvas-settings" style={{position:'absolute',marginLeft:'100%'}}>
             <div>
                 <ul className="pen-type-list">
                     <li 

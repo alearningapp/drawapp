@@ -14,7 +14,7 @@ const ColorSelect = ({
   penType,
   setPenType,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isCanvasSettingsOpen, setIsCanvasSettingsOpen] = useState(false);
   const colors = [
     '#000000', '#ff0000', '#00ff00', '#0000ff', 
     '#ffff00', '#ff00ff', '#00ffff', '#ffffff', 
@@ -24,17 +24,13 @@ const ColorSelect = ({
   ];
   const ref = useRef();
 
-  const toggleList = () => {
-    setIsOpen(!isOpen);
-  };
-
   const handleColorSelect = (color) => {
     setSelectedColor(color);
   };
 
   const handleClickOutside = (event) => {
     if (ref.current && !ref.current.contains(event.target)) {
-      setIsOpen(false);
+      setIsCanvasSettingsOpen(false);
     }
   };
 
@@ -48,91 +44,96 @@ const ColorSelect = ({
     document.addEventListener('touchstart', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
     };
   }, []);
 
   return (
-    <div ref={ref} style={{ position: 'absolute', display: 'flex', flexDirection: 'column' }}>
-      <div
-        onClick={toggleList}
-        role="button"
-        aria-haspopup="true"
-        aria-expanded={isOpen}
-        tabIndex={0}
-        onKeyDown={(e) => e.key === 'Enter' && toggleList()}
-        style={{
-          padding: '10px',
-          cursor: 'pointer',
-          borderRadius: '5px',
-          margin: '5px 0',
-          display: 'flex',
-        }}
-      >
-        <div style={{ background: selectedColor, border: '1px solid #ccc', padding: '10px', borderRadius: '5px' }}></div>
-        <FontAwesomeIcon style={{ color: selectedColor, marginLeft: '5px', height: '20px', backgroundColor: getComplementaryColor(selectedColor) }} icon={faPen} />
-      </div>
-      {isOpen && (
-        <div style={{ display: 'flex', maxHeight: 'calc(100vh - 150px)', overflow: 'auto' }}>
-          <div>
-            <ul style={{
-              listStyle: 'none',
-              padding: '10px',
-              margin: '0',
-              border: '1px solid #ccc',
-              backgroundColor: '#fff',
-              zIndex: 1000,
-              display: 'flex',
-              flexDirection: 'row',
-              flexWrap: 'wrap',
-              gap: '5px',
-              maxWidth: '200px'
-            }}>
-              {colors.map(color => (
-                <li
-                  key={color}
-                  onClick={() => handleColorSelect(color)}
-                  style={{
-                    backgroundColor: color,
-                    padding: '10px',
-                    cursor: 'pointer',
-                    borderRadius: '5px',
-                    flex: '0 0 30%',
-                    boxSizing: 'border-box',
-                    border: selectedColor === color ? `2px solid ${color}` : 'none', // Highlight selected color
-                    boxShadow: selectedColor === color ? `0 0 5px ${color}` : 'none' // Optional shadow effect
-                  }}
-                />
-              ))}
-              {/* Custom Color Input */}
-              <li style={{ padding: '0', flex: '0 0 30%' }}>
-                <input
-                  type="color"
-                  value={selectedColor}
-                  onChange={handleCustomColorChange}
-                  style={{
-                    width: '100%',
-                    height: '40px',
-                    border: 'none',
-                    borderRadius: '5px',
-                    cursor: 'pointer',
-                    padding: '0',
-                  }}
-                />
-              </li>
-            </ul>
-          </div>
-          <CanvasSettings 
-            penWidth={penWidth} 
-            setPenWidth={setPenWidth} 
-            opacity={opacity} 
-            setOpacity={setOpacity} 
-            penType={penType} 
-            setPenType={setPenType} 
-          />
-        </div>
+    <>
+    <div ref={ref} style={{ position: 'absolute', top: 0,bottom:0, left: 0, display: 'flex', zIndex: 1000 }}>
+      
+                {/* Canvas Settings */}
+          {isCanvasSettingsOpen && (
+        <CanvasSettings  
+          penWidth={penWidth} 
+          setPenWidth={setPenWidth} 
+          opacity={opacity} 
+          setOpacity={setOpacity} 
+          penType={penType} 
+          setPenType={setPenType} 
+        />
       )}
+      <div style={{  padding: '5px' }}>
+        {/* Toggle Button with Icon Only */}
+        <div
+          onClick={() => setIsCanvasSettingsOpen(!isCanvasSettingsOpen)}
+          role="button"
+          aria-haspopup="true"
+          aria-expanded={isCanvasSettingsOpen}
+          tabIndex={0}
+          onKeyDown={(e) => e.key === 'Enter' && setIsCanvasSettingsOpen(!isCanvasSettingsOpen)}
+          style={{
+            padding: '10px',
+            cursor: 'pointer',
+            border: '1px solid #ccc',
+            borderRadius: '5px',
+            marginBottom: '10px',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <FontAwesomeIcon style={{ color: selectedColor, height: '20px', backgroundColor: getComplementaryColor(selectedColor) }} icon={faPen} />
+        </div>
+
+        {/* Color Selection List */}
+        <ul style={{
+          listStyle: 'none',
+          padding: '0',
+          margin: '0',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '2px',
+        }}>
+          {colors.map(color => (
+            <li
+              key={color}
+              onClick={() => handleColorSelect(color)}
+              style={{
+                backgroundColor: color,
+                padding: '10px', // Padding for better touch area
+                cursor: 'pointer',
+                borderRadius: '5px',
+                border: selectedColor === color ? `2px solid ${color}` : 'none',
+                boxShadow: selectedColor === color ? `0 0 5px ${color}` : 'none',
+                transition: 'transform 0.1s',
+              }}
+            />
+          ))}
+          {/* Custom Color Input */}
+          <li style={{ padding: '0', margin: '2px 0' }}>
+            <input
+              type="color"
+              value={selectedColor}
+              onChange={handleCustomColorChange}
+              style={{
+                width: '100%',
+                height: '30px', // Height for the color input
+                border: 'none',
+                borderRadius: '5px',
+                cursor: 'pointer',
+                padding: '0',
+              }}
+            />
+          </li>
+        </ul>
+      </div>
+
+
     </div>
-  );
+
+
+    </>);
 };
 
 export default ColorSelect;
