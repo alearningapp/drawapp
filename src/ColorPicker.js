@@ -15,6 +15,7 @@ const ColorSelect = ({
   setPenType,
 }) => {
   const [isCanvasSettingsOpen, setIsCanvasSettingsOpen] = useState(false);
+  const [scrollPosition, setScrollPosition] = useState(0);
   const colors = [
     '#000000', '#ff0000', '#00ff00', '#0000ff', 
     '#ffff00', '#ff00ff', '#00ffff', '#ffffff', 
@@ -57,27 +58,33 @@ const ColorSelect = ({
 
     const handleStart = (event) => {
       if (!list) return;
-      initialY = event.touches ? event.touches[0].clientY : event.clientY; // For touch devices
+      initialY = event.touches ? event.touches[0].clientY : event.clientY;
       isScrolling = true;
     };
     
     const handleMove = (moveEvent) => {
       if (!isScrolling) return;
-      const currentY = moveEvent.touches ? moveEvent.touches[0].clientY : moveEvent.clientY; // For touch devices
-      const distance = currentY - initialY; // Calculate distance moved
-      const scrollAmount = Math.max(-10, Math.min(10, distance)); // Limit scroll amount
+      const currentY = moveEvent.touches ? moveEvent.touches[0].clientY : moveEvent.clientY;
+      const distance = currentY - initialY;
+      const scrollAmount = Math.max(-10, Math.min(10, distance));
 
       if (scrollAmount !== 0) {
-        list.scrollBy(0, scrollAmount); // Scroll the list
-        initialY = currentY; // Update the initial position for continuous scrolling
+        list.scrollBy(0, scrollAmount);
+        initialY = currentY;
+
+        // Update scroll position
+        const scrollTop = list.scrollTop;
+        const scrollHeight = list.scrollHeight;
+        const clientHeight = list.clientHeight;
+        const scrollPercent = (scrollTop / (scrollHeight - clientHeight)) * 100;
+        setScrollPosition(scrollPercent);
       }
     };
 
     const handleEnd = () => {
-      isScrolling = false; // Stop scrolling
+      isScrolling = false;
     };
 
-    // Add event listeners for both mouse and touch events
     list.addEventListener('mousedown', handleStart);
     list.addEventListener('mousemove', handleMove);
     list.addEventListener('mouseup', handleEnd);
@@ -95,6 +102,18 @@ const ColorSelect = ({
     };
   }, []);
 
+  // Styles for the scrollbar indicator
+  const scrollbarStyle = {
+    position: 'absolute',
+    right: '3px',
+    top: `${scrollPosition}%`,
+    width: '5px',
+    height: '30px',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    borderRadius: '5px',
+    transition: 'top 0.1s',
+  };
+
   return (
     <>
       <div ref={ref} style={{ position: 'absolute', top: 0, bottom: 0, left: 0, display: 'flex', zIndex: 1000 }}>
@@ -108,7 +127,7 @@ const ColorSelect = ({
             setPenType={setPenType} 
           />
         )}
-        <div style={{ padding: '5px', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ padding: '5px', display: 'flex', flexDirection: 'column', position: 'relative' }}>
           <div
             onClick={() => setIsCanvasSettingsOpen(!isCanvasSettingsOpen)}
             role="button"
@@ -117,11 +136,11 @@ const ColorSelect = ({
             tabIndex={0}
             onKeyDown={(e) => e.key === 'Enter' && setIsCanvasSettingsOpen(!isCanvasSettingsOpen)}
             style={{
-              padding: '10px',
+              padding: '0',
               cursor: 'pointer',
               border: '1px solid #ccc',
               borderRadius: '5px',
-              marginBottom: '10px',
+              marginBottom: '5px',
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
@@ -130,7 +149,8 @@ const ColorSelect = ({
             <FontAwesomeIcon style={{ color: selectedColor, height: '20px', backgroundColor: getComplementaryColor(selectedColor) }} icon={faPen} />
           </div>
 
-          <div ref={listRef} style={{ flexGrow: '1', overflow: 'hidden' }}>
+          <div ref={listRef} style={{ flexGrow: '1', overflow: 'hidden', position: 'relative' }}>
+           <div style={{position:"absolute"}}>
             <ul style={{
               listStyle: 'none',
               padding: '0',
@@ -170,6 +190,8 @@ const ColorSelect = ({
                 />
               </li>
             </ul>
+            <div style={scrollbarStyle} /> {/* Scrollbar indicator */}
+            </div>
           </div>
         </div>
       </div>
