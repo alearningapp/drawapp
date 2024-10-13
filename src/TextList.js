@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 
 // TextList Component
 const TextList = ({ setText }) => {
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
   const [activeTab, setActiveTab] = useState('alphabet');
   const [alphabetItems, setAlphabetItems] = useState(
     Array.from({ length: 26 }, (_, i) => `${String.fromCharCode(65 + i)}${String.fromCharCode(97 + i)}`)
