@@ -37,8 +37,7 @@ const Draw = () => {
     const drawText=(text)=>{
         const canvas=  canvasRef.current;
            const ctx = canvas.getContext('2d');
-
-           ctx.clearRect(0, 0, canvas.width, canvas.height);
+           resetCanvas();
            const margin = 10; // Define the margin
            let fontSize = 10; // Start with a small font size
            ctx.font = `${fontSize}px Arial`;
