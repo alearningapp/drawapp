@@ -135,7 +135,7 @@ const styles = {
     position: 'absolute',
     top: '10px',
     right: '10px',
-    backgroundColor: '#fff',
+    backgroundColor: 'rgb(255, 255, 255,0.5)',
     padding: '10px',
     border: '1px solid #ccc',
     borderRadius: '5px',

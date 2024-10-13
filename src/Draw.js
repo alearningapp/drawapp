@@ -34,43 +34,68 @@ const Draw = () => {
     const offsetXRef = useRef(0);
     const offsetYRef = useRef(0);
 
+    const drawText2=(canvas,ctx,text)=>{
+        
+        const margin = 10; // Define the margin
+        let fontSize = 10; // Start with a small font size
+        ctx.font = `${fontSize}px Arial`;
+        const offsetX = 40;
+         let width = canvas.width-offsetX;
+        // Measure the text and increase the font size until it fits within the canvas minus margin
+        while (true) {
+            ctx.font = `${fontSize}px Arial`;
+            const textWidth = ctx.measureText(text).width;
+            const textHeight = fontSize; // Approximate height as fontSize for simplicity
+
+            // Check if the text exceeds canvas dimensions with margins
+            if (textWidth > (width - margin * 2) || textHeight > (canvas.height - margin * 2)) {
+                fontSize--; // Decrease font size if it overflows
+                break; // Exit the loop
+            }
+
+            fontSize++; // Increase font size
+        }
+
+        // Center the text with margin
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        const x = width / 2;
+        const y = canvas.height / 2;
+
+        // Set opacity
+        ctx.globalAlpha = 0.5;
+
+        // Draw the text with the margin applied
+        ctx.fillText(text, x+offsetX, y);
+
+         ctx.globalAlpha = 1.0;
+    }
+
     const drawText=(text)=>{
         const canvas=  canvasRef.current;
            const ctx = canvas.getContext('2d');
            resetCanvas();
-           const margin = 10; // Define the margin
-           let fontSize = 10; // Start with a small font size
-           ctx.font = `${fontSize}px Arial`;
-           const offsetX = 40;
-            let width = canvas.width-offsetX;
-           // Measure the text and increase the font size until it fits within the canvas minus margin
-           while (true) {
-               ctx.font = `${fontSize}px Arial`;
-               const textWidth = ctx.measureText(text).width;
-               const textHeight = fontSize; // Approximate height as fontSize for simplicity
-   
-               // Check if the text exceeds canvas dimensions with margins
-               if (textWidth > (width - margin * 2) || textHeight > (canvas.height - margin * 2)) {
-                   fontSize--; // Decrease font size if it overflows
-                   break; // Exit the loop
-               }
-   
-               fontSize++; // Increase font size
-           }
-   
-           // Center the text with margin
-           ctx.textAlign = "center";
-           ctx.textBaseline = "middle";
-           const x = width / 2;
-           const y = canvas.height / 2;
-   
-           // Set opacity
-           ctx.globalAlpha = 0.5;
-   
-           // Draw the text with the margin applied
-           ctx.fillText(text, x+offsetX, y);
 
-            ctx.globalAlpha = 1.0;
+     
+            // Create a new image object
+            const img = new Image();
+            img.src = encodeURIComponent(text.toLowerCase())+'.jpeg'; // Replace with your image URL
+    
+            // Draw the image on the canvas once it has loaded
+            img.onload = function() {
+                // Calculate the position to center the image
+                const x = (canvas.width - img.width) / 2;
+                const y = (canvas.height - img.height) / 2;
+                resetCanvas();
+                ctx.globalAlpha = 0.5;
+                ctx.drawImage(img, x, y); // Draw the image at the calculated position
+                ctx.globalAlpha = 1.0;
+                drawText2(canvas,ctx,text);
+            };
+       
+            drawText2(canvas,ctx,text);
+
+
 
 
     };
