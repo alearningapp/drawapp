@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
 
 // TextList Component
 const TextList = ({ setText }) => {
@@ -84,7 +86,7 @@ const TextList = ({ setText }) => {
   return (
     <div ref={containerRef} style={styles.container}>
       <button onClick={toggleList} style={styles.toggleButton}>
-        {isVisible ? 'Hide List' : 'Show List'}
+        <FontAwesomeIcon icon={isVisible ? faChevronUp : faChevronDown} />
       </button>
       {isVisible && (
         <div style={styles.listContainer}>
@@ -132,8 +134,10 @@ const styles = {
   toggleButton: {
     marginBottom: '10px',
     padding: '12px',
-    fontSize: '18px',
+    fontSize: '24px',
     cursor: 'pointer',
+    background: 'none',
+    border: 'none',
   },
   listContainer: {
     display: 'flex',
