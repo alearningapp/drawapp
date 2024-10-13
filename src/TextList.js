@@ -25,6 +25,11 @@ const TextList = ({ setText }) => {
     'Nephew', 'Grandchild', 'Mentor', 'Spouse', 
     'Fiancé', 'Guardian', 'Classmate', 'Teacher'
   ]);
+  const [numberItems, setNumberItems] = useState([
+    '0 zero', '1 one', '2 two', '3 three', '4 four', 
+    '5 five', '6 six', '7 seven', '8 eight', '9 nine', 
+    '10 ten'
+  ]);
 
   const containerRef = useRef(null);
 
@@ -33,10 +38,12 @@ const TextList = ({ setText }) => {
   const addItem = (category) => {
     const newItem = `${category} ${category === 'Fruit' ? fruitItems.length + 1 : 
                      category === 'Animal' ? animalItems.length + 1 : 
-                     relationshipItems.length + 1}`;
+                     category === 'Relationship' ? relationshipItems.length + 1 : 
+                     numberItems.length + 1}`;
     if (category === 'Fruit') setFruitItems([...fruitItems, newItem]);
     if (category === 'Animal') setAnimalItems([...animalItems, newItem]);
     if (category === 'Relationship') setRelationshipItems([...relationshipItems, newItem]);
+    if (category === 'Number') setNumberItems([...numberItems, newItem]);
   };
 
   const handleItemClick = (item) => {
@@ -81,7 +88,7 @@ const TextList = ({ setText }) => {
       </button>
       {isVisible && (
         <div style={styles.listContainer}>
-          {['Fruits', 'Animals', 'Relationships'].map((category) => (
+          {['Fruits', 'Animals', 'Relationships', 'Numbers'].map((category) => (
             <div key={category}>
               <button 
                 onClick={() => toggleAccordion(category)} 
@@ -91,9 +98,13 @@ const TextList = ({ setText }) => {
               </button>
               {activeAccordion === category && (
                 <div style={styles.accordionContent}>
-                  {renderItems(category === 'Fruits' ? fruitItems : 
-                                category === 'Animals' ? animalItems : 
-                                relationshipItems, category)}
+                  {renderItems(
+                    category === 'Fruits' ? fruitItems : 
+                    category === 'Animals' ? animalItems : 
+                    category === 'Relationships' ? relationshipItems : 
+                    numberItems,
+                    category
+                  )}
                 </div>
               )}
             </div>
