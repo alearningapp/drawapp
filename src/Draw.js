@@ -212,6 +212,7 @@ const Draw = () => {
         if (actions.current.length === 0 || settingRef.current.isReplaying) return;
 
         setIsReplaying(true);
+        settingRef.current.isReplaying=true;
         const ctx = canvasRef.current.getContext('2d');
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
         ctx.lineCap = 'round';
@@ -226,6 +227,10 @@ const Draw = () => {
 
             for (let pointIndex = 1; pointIndex < points.length; pointIndex++) {
                 const point = points[pointIndex];
+                if (!settingRef.current.isReplaying){
+                    console.log('return')
+                    return ;
+                } 
                 await new Promise((resolve) => {
                     setTimeout(() => {
                         if (!settingRef.current.isReplaying) return resolve();
