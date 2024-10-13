@@ -116,7 +116,7 @@ const Draw = () => {
         cursorRef.current.style.left = `${offsetX -rect.x }px`;
         cursorRef.current.style.top = `${offsetY -rect.y  }px`;
 
-        if (!isDrawingRef.current) return;
+        if (!isDrawingRef.current       ||  offsetXRef.current == offsetX&&offsetYRef.current == offsetY) return;
         const ctx = canvasRef.current.getContext('2d');
         ctx.beginPath();
         ctx.moveTo(offsetXRef.current, offsetYRef.current);
