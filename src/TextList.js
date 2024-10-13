@@ -3,10 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 // TextList Component
 const TextList = ({ setText }) => {
   const [isVisible, setIsVisible] = useState(false);
-  const [activeTab, setActiveTab] = useState('alphabet');
-  const [alphabetItems, setAlphabetItems] = useState(
-    Array.from({ length: 26 }, (_, i) => `${String.fromCharCode(65 + i)}${String.fromCharCode(97 + i)}`)
-  );
+  const [activeAccordion, setActiveAccordion] = useState(null);
   const [fruitItems, setFruitItems] = useState([
     'Apple', 'Banana', 'Cherry', 'Date', 'Elderberry', 'Fig', 
     'Grape', 'Honeydew', 'Kiwi', 'Lemon', 'Mango', 'Nectarine', 
@@ -33,19 +30,13 @@ const TextList = ({ setText }) => {
 
   const toggleList = () => setIsVisible(!isVisible);
 
-  const addFruitItem = () => {
-    const newItem = `Fruit ${fruitItems.length + 1}`;
-    setFruitItems([...fruitItems, newItem]);
-  };
-
-  const addAnimalItem = () => {
-    const newItem = `Animal ${animalItems.length + 1}`;
-    setAnimalItems([...animalItems, newItem]);
-  };
-
-  const addRelationshipItem = () => {
-    const newItem = `Relationship ${relationshipItems.length + 1}`;
-    setRelationshipItems([...relationshipItems, newItem]);
+  const addItem = (category) => {
+    const newItem = `${category} ${category === 'Fruit' ? fruitItems.length + 1 : 
+                     category === 'Animal' ? animalItems.length + 1 : 
+                     relationshipItems.length + 1}`;
+    if (category === 'Fruit') setFruitItems([...fruitItems, newItem]);
+    if (category === 'Animal') setAnimalItems([...animalItems, newItem]);
+    if (category === 'Relationship') setRelationshipItems([...relationshipItems, newItem]);
   };
 
   const handleItemClick = (item) => {
@@ -61,28 +52,27 @@ const TextList = ({ setText }) => {
 
   useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('touchstart', handleClickOutside);
-
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('touchstart', handleClickOutside);
     };
   }, [containerRef]);
 
-  const renderItems = (items, isAddButtonVisible = false, addItemFunction) => (
+  const renderItems = (items, category) => (
     <div style={styles.scrollableList}>
       {items.map((item, index) => (
         <div key={index} style={styles.listItem} onClick={() => handleItemClick(item)}>
           {item}
         </div>
       ))}
-      {isAddButtonVisible && (
-        <button onClick={addItemFunction} style={styles.addButton}>
-          Add Item
-        </button>
-      )}
+      <button onClick={() => addItem(category)} style={styles.addButton}>
+        Add Item
+      </button>
     </div>
   );
+
+  const toggleAccordion = (category) => {
+    setActiveAccordion(activeAccordion === category ? null : category);
+  };
 
   return (
     <div ref={containerRef} style={styles.container}>
@@ -91,23 +81,23 @@ const TextList = ({ setText }) => {
       </button>
       {isVisible && (
         <div style={styles.listContainer}>
-          <div style={styles.tabs}>
-            {['alphabet', 'fruits', 'animals', 'relationships'].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                style={activeTab === tab ? styles.activeTab : styles.tab}
+          {['Fruits', 'Animals', 'Relationships'].map((category) => (
+            <div key={category}>
+              <button 
+                onClick={() => toggleAccordion(category)} 
+                style={styles.accordionButton}
               >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                {category} {activeAccordion === category ? '−' : '+'}
               </button>
-            ))}
-          </div>
-          <div style={styles.category}>
-            {activeTab === 'alphabet' ? renderItems(alphabetItems) : 
-             activeTab === 'fruits' ? renderItems(fruitItems, true, addFruitItem) : 
-             activeTab === 'animals' ? renderItems(animalItems, true, addAnimalItem) : 
-             renderItems(relationshipItems, true, addRelationshipItem)}
-          </div>
+              {activeAccordion === category && (
+                <div style={styles.accordionContent}>
+                  {renderItems(category === 'Fruits' ? fruitItems : 
+                                category === 'Animals' ? animalItems : 
+                                relationshipItems, category)}
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       )}
     </div>
@@ -141,29 +131,18 @@ const styles = {
     borderRadius: '5px',
     padding: '5px',
   },
-  tabs: {
-    display: 'flex',
-    borderBottom: '1px solid #ccc',
-    marginBottom: '10px',
-  },
-  tab: {
+  accordionButton: {
     padding: '10px',
     cursor: 'pointer',
-    backgroundColor: 'transparent',
+    backgroundColor: '#e7e7e7',
     border: 'none',
+    textAlign: 'left',
+    width: '100%',
     fontSize: '16px',
   },
-  activeTab: {
-    padding: '10px',
-    cursor: 'pointer',
-    backgroundColor: '#f0f0f0',
-    border: 'none',
-    fontSize: '16px',
-    fontWeight: 'bold',
-  },
-  category: {
-    display: 'flex',
-    flexDirection: 'column',
+  accordionContent: {
+    padding: '5px 10px',
+    borderTop: '1px solid #ccc',
   },
   scrollableList: {
     maxHeight: '50vh',
