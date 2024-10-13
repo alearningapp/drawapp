@@ -49,140 +49,132 @@ const ColorSelect = ({
     };
   }, []);
 
-    // Scrolling logic
-    useEffect(() => {
+  // Scrolling logic
+  useEffect(() => {
+    let initialY = 0;
+    let isScrolling = false;
+    const list = listRef.current;
 
-      let initialY = 0;
-      let isScrolling = false;
-      const list = listRef.current;
-      const handleMouseDown = (event) => {
-     
-        if (!list) return;
-        initialY = event.clientY; // Store the initial mouse position
-        isScrolling = true;
+    const handleStart = (event) => {
+      if (!list) return;
+      initialY = event.touches ? event.touches[0].clientY : event.clientY; // For touch devices
+      isScrolling = true;
+    };
     
-        // Add mousemove and mouseup event listeners to the list
-        console.log('add mouseup')
+    const handleMove = (moveEvent) => {
+      if (!isScrolling) return;
+      const currentY = moveEvent.touches ? moveEvent.touches[0].clientY : moveEvent.clientY; // For touch devices
+      const distance = currentY - initialY; // Calculate distance moved
+      const scrollAmount = Math.max(-10, Math.min(10, distance)); // Limit scroll amount
 
-
+      if (scrollAmount !== 0) {
+        list.scrollBy(0, scrollAmount); // Scroll the list
+        initialY = currentY; // Update the initial position for continuous scrolling
       }
-         
-      const handleMouseMove = (moveEvent) => {
-        if (!isScrolling) return;
-        console.log('handleMouseMove')
+    };
 
-        const distance = moveEvent.clientY - initialY; // Calculate distance moved
-        const scrollAmount = Math.max(-10, Math.min(10, distance)); // Limit scroll amount
-  
-        if (scrollAmount !== 0) {
-          list.scrollBy(0, scrollAmount); // Scroll the list
-          initialY = moveEvent.clientY; // Update the initial position for continuous scrolling
-        }
-      };
-  
-      const handleMouseUp = () => {
-        isScrolling = false; // Stop scrolling
+    const handleEnd = () => {
+      isScrolling = false; // Stop scrolling
+    };
 
+    // Add event listeners for both mouse and touch events
+    list.addEventListener('mousedown', handleStart);
+    list.addEventListener('mousemove', handleMove);
+    list.addEventListener('mouseup', handleEnd);
+    list.addEventListener('touchstart', handleStart);
+    list.addEventListener('touchmove', handleMove);
+    list.addEventListener('touchend', handleEnd);
 
-      };
-
-       listRef.current.addEventListener('mousedown',handleMouseDown);
-        listRef.current.addEventListener('mousemove', handleMouseMove);
-       document.addEventListener('mouseup', handleMouseUp);
-       return ()=>{
-        listRef.current.removeEventListener('mousedown',handleMouseDown);
-        listRef.current.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
-       }
-    }, []);
+    return () => {
+      list.removeEventListener('mousedown', handleStart);
+      list.removeEventListener('mousemove', handleMove);
+      list.removeEventListener('mouseup', handleEnd);
+      list.removeEventListener('touchstart', handleStart);
+      list.removeEventListener('touchmove', handleMove);
+      list.removeEventListener('touchend', handleEnd);
+    };
+  }, []);
 
   return (
     <>
-    <div ref={ref} style={{ position: 'absolute', top: 0,bottom:0, left: 0, display: 'flex', zIndex: 1000 }}>
-      
-                {/* Canvas Settings */}
-          {isCanvasSettingsOpen && (
-        <CanvasSettings  
-          penWidth={penWidth} 
-          setPenWidth={setPenWidth} 
-          opacity={opacity} 
-          setOpacity={setOpacity} 
-          penType={penType} 
-          setPenType={setPenType} 
-        />
-      )}
-      <div style={{  padding: '5px',display:'flex',flexDirection:'column' }}>
-        {/* Toggle Button with Icon Only */}
-        <div
-          onClick={() => setIsCanvasSettingsOpen(!isCanvasSettingsOpen)}
-          role="button"
-          aria-haspopup="true"
-          aria-expanded={isCanvasSettingsOpen}
-          tabIndex={0}
-          onKeyDown={(e) => e.key === 'Enter' && setIsCanvasSettingsOpen(!isCanvasSettingsOpen)}
-          style={{
-            padding: '10px',
-            cursor: 'pointer',
-            border: '1px solid #ccc',
-            borderRadius: '5px',
-            marginBottom: '10px',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          <FontAwesomeIcon style={{ color: selectedColor, height: '20px', backgroundColor: getComplementaryColor(selectedColor) }} icon={faPen} />
+      <div ref={ref} style={{ position: 'absolute', top: 0, bottom: 0, left: 0, display: 'flex', zIndex: 1000 }}>
+        {isCanvasSettingsOpen && (
+          <CanvasSettings  
+            penWidth={penWidth} 
+            setPenWidth={setPenWidth} 
+            opacity={opacity} 
+            setOpacity={setOpacity} 
+            penType={penType} 
+            setPenType={setPenType} 
+          />
+        )}
+        <div style={{ padding: '5px', display: 'flex', flexDirection: 'column' }}>
+          <div
+            onClick={() => setIsCanvasSettingsOpen(!isCanvasSettingsOpen)}
+            role="button"
+            aria-haspopup="true"
+            aria-expanded={isCanvasSettingsOpen}
+            tabIndex={0}
+            onKeyDown={(e) => e.key === 'Enter' && setIsCanvasSettingsOpen(!isCanvasSettingsOpen)}
+            style={{
+              padding: '10px',
+              cursor: 'pointer',
+              border: '1px solid #ccc',
+              borderRadius: '5px',
+              marginBottom: '10px',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <FontAwesomeIcon style={{ color: selectedColor, height: '20px', backgroundColor: getComplementaryColor(selectedColor) }} icon={faPen} />
+          </div>
+
+          <div ref={listRef} style={{ flexGrow: '1', overflow: 'hidden' }}>
+            <ul style={{
+              listStyle: 'none',
+              padding: '0',
+              margin: '0',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '2px',
+            }}>
+              {colors.map(color => (
+                <li
+                  key={color}
+                  onClick={() => handleColorSelect(color)}
+                  style={{
+                    backgroundColor: color,
+                    padding: '10px',
+                    cursor: 'pointer',
+                    borderRadius: '5px',
+                    border: selectedColor === color ? `2px solid ${color}` : 'none',
+                    boxShadow: selectedColor === color ? `0 0 5px ${color}` : 'none',
+                    transition: 'transform 0.1s',
+                  }}
+                />
+              ))}
+              <li style={{ padding: '0', margin: '2px 0' }}>
+                <input
+                  type="color"
+                  value={selectedColor}
+                  onChange={handleCustomColorChange}
+                  style={{
+                    width: '100%',
+                    height: '30px',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    padding: '0',
+                  }}
+                />
+              </li>
+            </ul>
+          </div>
         </div>
-
-        {/* Color Selection List */}
-        <div ref={listRef} style={{flexGrow:'1',overflow:'hidden'}}>
-        <ul style={{
-          listStyle: 'none',
-          padding: '0',
-          margin: '0',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '2px',
-        }}>
-          {colors.map(color => (
-            <li
-              key={color}
-              onClick={() => handleColorSelect(color)}
-              style={{
-                backgroundColor: color,
-                padding: '10px', // Padding for better touch area
-                cursor: 'pointer',
-                borderRadius: '5px',
-                border: selectedColor === color ? `2px solid ${color}` : 'none',
-                boxShadow: selectedColor === color ? `0 0 5px ${color}` : 'none',
-                transition: 'transform 0.1s',
-              }}
-            />
-          ))}
-          {/* Custom Color Input */}
-          <li style={{ padding: '0', margin: '2px 0' }}>
-            <input
-              type="color"
-              value={selectedColor}
-              onChange={handleCustomColorChange}
-              style={{
-                width: '100%',
-                height: '30px', // Height for the color input
-                border: 'none',
-                borderRadius: '5px',
-                cursor: 'pointer',
-                padding: '0',
-              }}
-            />
-          </li>
-        </ul>
       </div>
-
-      </div>
-    </div>
-
-
-    </>);
+    </>
+  );
 };
 
 export default ColorSelect;
