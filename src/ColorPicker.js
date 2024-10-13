@@ -23,6 +23,7 @@ const ColorSelect = ({
     '#f0e68c', '#add8e6', '#ffb6c1', '#ffa07a'
   ];
   const ref = useRef();
+  const listRef = useRef(null);
 
   const handleColorSelect = (color) => {
     setSelectedColor(color);
@@ -48,6 +49,53 @@ const ColorSelect = ({
     };
   }, []);
 
+    // Scrolling logic
+    useEffect(() => {
+
+      let initialY = 0;
+      let isScrolling = false;
+      const list = listRef.current;
+      const handleMouseDown = (event) => {
+     
+        if (!list) return;
+        initialY = event.clientY; // Store the initial mouse position
+        isScrolling = true;
+    
+        // Add mousemove and mouseup event listeners to the list
+        console.log('add mouseup')
+
+
+      }
+         
+      const handleMouseMove = (moveEvent) => {
+        if (!isScrolling) return;
+        console.log('handleMouseMove')
+
+        const distance = moveEvent.clientY - initialY; // Calculate distance moved
+        const scrollAmount = Math.max(-10, Math.min(10, distance)); // Limit scroll amount
+  
+        if (scrollAmount !== 0) {
+          list.scrollBy(0, scrollAmount); // Scroll the list
+          initialY = moveEvent.clientY; // Update the initial position for continuous scrolling
+        }
+      };
+  
+      const handleMouseUp = () => {
+        isScrolling = false; // Stop scrolling
+
+
+      };
+
+       listRef.current.addEventListener('mousedown',handleMouseDown);
+        listRef.current.addEventListener('mousemove', handleMouseMove);
+       document.addEventListener('mouseup', handleMouseUp);
+       return ()=>{
+        listRef.current.removeEventListener('mousedown',handleMouseDown);
+        listRef.current.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+       }
+    }, []);
+
   return (
     <>
     <div ref={ref} style={{ position: 'absolute', top: 0,bottom:0, left: 0, display: 'flex', zIndex: 1000 }}>
@@ -63,7 +111,7 @@ const ColorSelect = ({
           setPenType={setPenType} 
         />
       )}
-      <div style={{  padding: '5px' }}>
+      <div style={{  padding: '5px',display:'flex',flexDirection:'column' }}>
         {/* Toggle Button with Icon Only */}
         <div
           onClick={() => setIsCanvasSettingsOpen(!isCanvasSettingsOpen)}
@@ -87,6 +135,7 @@ const ColorSelect = ({
         </div>
 
         {/* Color Selection List */}
+        <div ref={listRef} style={{flexGrow:'1',overflow:'hidden'}}>
         <ul style={{
           listStyle: 'none',
           padding: '0',
@@ -129,7 +178,7 @@ const ColorSelect = ({
         </ul>
       </div>
 
-
+      </div>
     </div>
 
 
