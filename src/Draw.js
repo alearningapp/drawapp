@@ -3,7 +3,7 @@ import ColorPicker from './ColorPicker';
 import ButtonContainer from './ButtonContainer';
 import CursorIcon from './CursorIcon'; // Import the new CursorIcon component
 import './Draw.css';
-import {hexToRgb} from './Util';
+import {hexToRgb,createPlayAudio} from './Util';
 import TextList from './TextList';
 
 const ReplayState = {
@@ -94,6 +94,7 @@ const Draw = () => {
             };
        
             drawText2(canvas,ctx,text);
+            createPlayAudio('sound/us.'+encodeURIComponent(text.toLowerCase())+".mp3");
 
 
 
