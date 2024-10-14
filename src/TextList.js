@@ -67,7 +67,6 @@ const TextList = ({ setText }) => {
     await  createPlayAudio('sound/us.'+encodeURIComponent(curText.toLowerCase())+".mp3");
   }
   const handleItemClick = (item) => {
-    setIsVisible(false);
     setText(item);
 
     (async()=>{
