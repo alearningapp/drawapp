@@ -94,14 +94,7 @@ const Draw = () => {
             };
        
             drawText2(canvas,ctx,text);
-            (async()=>{
-                try{
-                    await  createPlayAudio('sound/us.'+encodeURIComponent(text.toLowerCase())+".mp3");
 
-                }catch(error){
-
-                }
-            })();
             
 
 

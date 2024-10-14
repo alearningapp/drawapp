@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
+import { faChevronDown, faChevronUp,faPlay } from '@fortawesome/free-solid-svg-icons';
+import {createPlayAudio} from './Util';
 
 // TextList Component
 const TextList = ({ setText }) => {
@@ -43,6 +44,9 @@ const TextList = ({ setText }) => {
   ]);
 
   const containerRef = useRef(null);
+  const [curText,setCurText] = useState(null);
+
+
 
   const toggleList = () => setIsVisible(!isVisible);
 
@@ -59,9 +63,24 @@ const TextList = ({ setText }) => {
     if (category === 'Toys') setToyItems([...toyItems, newItem]);
   };
 
+  const  playAudio = async ()=>{
+    await  createPlayAudio('sound/us.'+encodeURIComponent(curText.toLowerCase())+".mp3");
+  }
   const handleItemClick = (item) => {
-    setText(item);
     setIsVisible(false);
+    setText(item);
+
+    (async()=>{
+      try{
+          await  createPlayAudio('sound/us.'+encodeURIComponent(item.toLowerCase())+".mp3");
+          setCurText(item);
+          console.log(item)
+      }catch(error){
+        setCurText(null);
+
+      }
+
+  })();
   };
 
   const handleClickOutside = (event) => {
@@ -96,9 +115,18 @@ const TextList = ({ setText }) => {
 
   return (
     <div ref={containerRef} style={styles.container}>
-      <button onClick={toggleList} style={styles.toggleButton}>
+      <div style={{display:'flex',justifyContent:'space-between'}}>
+        <div style={{margin:'5px'}}>
+        {curText&&(<FontAwesomeIcon icon={faPlay} onClick={playAudio} />)}
+        </div>
+        <div style={{margin:'5px'}}>
+        <button onClick={toggleList} style={styles.toggleButton}>
         <FontAwesomeIcon icon={isVisible ? faChevronUp : faChevronDown} />
       </button>
+        </div>
+
+      </div>
+
       {isVisible && (
         <div style={styles.listContainer}>
           {['Fruits', 'Animals', 'Relationships', 'Numbers', 'Toys'].map((category) => (
@@ -135,8 +163,7 @@ const styles = {
     position: 'absolute',
     top: '10px',
     right: '10px',
-    backgroundColor: 'rgb(255, 255, 255,0.5)',
-    padding: '10px',
+    backgroundColor: 'rgb(255, 255, 255,0.6)',
     border: '1px solid #ccc',
     borderRadius: '5px',
     boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
@@ -144,12 +171,12 @@ const styles = {
     overflow: 'hidden',
   },
   toggleButton: {
-    marginBottom: '10px',
     padding: '12px',
     fontSize: '24px',
     cursor: 'pointer',
     background: 'none',
     border: 'none',
+    padding:0
   },
   listContainer: {
     display: 'flex',
@@ -161,11 +188,11 @@ const styles = {
   accordionButton: {
     padding: '10px',
     cursor: 'pointer',
-    backgroundColor: '#e7e7e7',
     border: 'none',
     textAlign: 'left',
     width: '100%',
     fontSize: '16px',
+    background:"transparent"
   },
   accordionContent: {
     padding: '5px 10px',

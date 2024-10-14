@@ -44,26 +44,14 @@ export async function createPlayAudio(audioFile) {
 
     return new Promise((resolve,reject)=>{
 
-
-        try {
-            const audio = new Audio(audioFile);
-
-    
-            // Wait for the audio to finish playing
-            audio.addEventListener('ended', () => {
-                
-                resolve();
+        const audio = new Audio(audioFile);
+        return  audio.play().then(() => {
+             resolve();
+            })
+            .catch(error => {
+              reject();
             });
-            audio.play().then(() => {
-                // Audio is playing.
-              })
-              .catch(error => {
-                console.log(error);
-              });
-       } catch (error) {
-           console.error('Playback failed:', error);
-           reject();
-       }
+    
     })
 
 }
