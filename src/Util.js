@@ -43,17 +43,23 @@ export function getComplementaryColor(hex) {
 export async function createPlayAudio(audioFile) {
 
     return new Promise((resolve,reject)=>{
-        const audio = new Audio(audioFile);
 
-    
-        // Wait for the audio to finish playing
-        audio.addEventListener('ended', () => {
-            
-            resolve();
-        });
 
         try {
-            audio.play();
+            const audio = new Audio(audioFile);
+
+    
+            // Wait for the audio to finish playing
+            audio.addEventListener('ended', () => {
+                
+                resolve();
+            });
+            audio.play().then(() => {
+                // Audio is playing.
+              })
+              .catch(error => {
+                console.log(error);
+              });
        } catch (error) {
            console.error('Playback failed:', error);
            reject();

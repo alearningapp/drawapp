@@ -94,7 +94,15 @@ const Draw = () => {
             };
        
             drawText2(canvas,ctx,text);
-            createPlayAudio('sound/us.'+encodeURIComponent(text.toLowerCase())+".mp3");
+            (async()=>{
+                try{
+                    await  createPlayAudio('sound/us.'+encodeURIComponent(text.toLowerCase())+".mp3");
+
+                }catch(error){
+
+                }
+            })();
+            
 
 
 
