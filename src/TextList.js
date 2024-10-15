@@ -64,14 +64,14 @@ const TextList = ({ setText }) => {
   };
 
   const  playAudio = async ()=>{
-    await  createPlayAudio('sound/us.'+encodeURIComponent(curText.toLowerCase())+".mp3");
+    await  createPlayAudio('sound/us/'+encodeURIComponent(curText.toLowerCase())+".mp3");
   }
   const handleItemClick = (item) => {
     setText(item);
 
     (async()=>{
       try{
-          await  createPlayAudio('sound/us.'+encodeURIComponent(item.toLowerCase())+".mp3");
+          await  createPlayAudio('sound/us/'+encodeURIComponent(item.toLowerCase())+".mp3");
           setCurText(item);
           console.log(item)
       }catch(error){
