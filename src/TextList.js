@@ -64,13 +64,12 @@ const TextList = ({ setText }) => {
 
   useEffect(() => {
     const checkOverflow = () => {
+      containerRef.current.style.bottom = '';
       if (listContainerRef.current) {
         const { scrollHeight } = listContainerRef.current;
         if (scrollHeight > listContainerRef.current.parentNode.parentNode.clientHeight-10) {
           containerRef.current.style.bottom = '0';
-        } else {
-          containerRef.current.style.bottom = '';
-        }
+        } 
       }
     };
 
@@ -84,7 +83,7 @@ const TextList = ({ setText }) => {
 
   return (
     <div ref={containerRef} className={styles.container}>
-      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between',position:'sticky',top:'0' }}>
         <div style={{ margin: '5px' }}>
           {curText && <FontAwesomeIcon icon={faPlay} onClick={playAudio} />}
         </div>
