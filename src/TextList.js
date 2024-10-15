@@ -24,6 +24,12 @@ const TextList = ({ setText }) => {
     };
 
     fetchCategories();
+
+    window.addEventListener('click', (event) => {
+      if (!containerRef.current.contains(event.target) ) {
+        setIsVisible(false)
+      }
+  });
   }, []);
 
   const toggleList = () => setIsVisible(!isVisible);
