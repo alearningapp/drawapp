@@ -18,10 +18,11 @@ const Draw = () => {
     const [penWidth, setPenWidth] = useState(5);
     const [opacity, setOpacity] = useState(1);
     const [svgElements, setSvgElements] = useState([]);
+    const [isReplaying, setIsReplaying] = useState(false);
+    const [replayIndex, setReplayIndex] = useState(0);
 
     const startDrawing = useCallback((e) => {
         e.preventDefault();
-        if (!svgRef.current) return; // Check if svgRef is available
         isDrawingRef.current = true;
         const { offsetX, offsetY } = getOffset(e);
         settingRef.current.points = [{ x: offsetX, y: offsetY }];
@@ -29,22 +30,21 @@ const Draw = () => {
     }, []);
 
     const moveDraw = (e) => {
-        if (!isDrawingRef.current || !svgRef.current) return; // Check if svgRef is available
+        if (!isDrawingRef.current) return;
         const { offsetX, offsetY } = getOffset(e);
         const newPoint = { x: offsetX, y: offsetY };
         settingRef.current.points.push(newPoint);
         setSvgElements((prev) => {
             const lastElement = prev[prev.length - 1];
             if (lastElement && lastElement.type === 'polyline') {
-                lastElement.points.push(newPoint); // Update last polyline's points
-                return [...prev]; // Return updated array
+                lastElement.points.push(newPoint);
+                return [...prev];
             }
             return [...prev, { type: 'polyline', points: [newPoint] }];
         });
     };
 
     const stopDrawing = () => {
-        console.log('stop')
         if (!isDrawingRef.current) return;
         isDrawingRef.current = false;
         const newAction = {
@@ -74,15 +74,41 @@ const Draw = () => {
         setCurrentIndex(currentIndexRef.current);
     };
 
-    const restoreCanvas = () => {
-        setSvgElements([]);
-        actions.current.forEach(action => {
-            setSvgElements(prev => [...prev, { type: 'polyline', points: action.points }]);
-        });
+    const restoreCanvas = (isReplay = false) => {
+        if (isReplay) {
+            // Clear existing elements for replay
+            setSvgElements([]);
+            let index = 0;
+
+            const playNextAction = () => {
+                if (index < actions.current.length) {
+                    const action = actions.current[index];
+                    setSvgElements(prev => [
+                        ...prev,
+                        { type: 'polyline', points: action.points, color: action.color }
+                    ]);
+                    index++;
+                    setTimeout(playNextAction, 100); // Set time for the next action
+                } else {
+                    setIsReplaying(false);
+                }
+            };
+
+            playNextAction(); // Start the sequence
+        } else {
+            // Restore all elements without animation
+            setSvgElements([]);
+            actions.current.forEach(action => {
+                setSvgElements(prev => [
+                    ...prev,
+                    { type: 'polyline', points: action.points, color: action.color }
+                ]);
+            });
+        }
     };
 
     useEffect(() => {
-        restoreCanvas();
+        restoreCanvas(false); // Default to non-replay mode
     }, [actionsLen]);
 
     const drawElements = () => {
@@ -113,7 +139,7 @@ const Draw = () => {
             currentIndexRef.current -= 1;
             setCurrentIndex(currentIndexRef.current);
             setActionsLen(actions.current.length);
-            restoreCanvas();
+            restoreCanvas(false); // Restore without replay
         }
     };
 
@@ -122,7 +148,7 @@ const Draw = () => {
             currentIndexRef.current += 1;
             setCurrentIndex(currentIndexRef.current);
             setActionsLen(actions.current.length);
-            restoreCanvas();
+            restoreCanvas(false); // Restore without replay
         }
     };
 
@@ -131,6 +157,18 @@ const Draw = () => {
         setActionsLen(0);
         setCurrentIndex(-1);
         setSvgElements([]);
+    };
+
+    const replayDrawing = () => {
+        if (isReplaying) {
+            setIsReplaying(false);
+            setReplayIndex(0);
+            return;
+        }
+
+        setIsReplaying(true);
+        setReplayIndex(0);
+        restoreCanvas(true); // Trigger replay mode
     };
 
     return (
@@ -168,6 +206,8 @@ const Draw = () => {
                 undo={undo}
                 redo={redo}
                 resetCanvas={resetCanvas}
+                replayDrawing={replayDrawing}
+                isReplaying={isReplaying}
                 actionsLen={actionsLen}
                 currentIndex={currentIndex}
             />

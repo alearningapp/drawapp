@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUndo, faRedo, faPlay, faPause, faSync, faPalette, faEllipsisH, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
+import { faUndo, faRedo, faPlay, faPause, faSync,  faEllipsisH, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import './ButtonContainer.css'; // Updated CSS file import
 
 const ButtonContainer = ({
@@ -8,8 +8,6 @@ const ButtonContainer = ({
     redo,
     replayDrawing,
     resetCanvas,
-    isColorPickerOpen,
-    setIsColorPickerOpen,
     actionsLen,
     currentIndex,
     isReplaying,
