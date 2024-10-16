@@ -19,21 +19,23 @@ const Draw = () => {
     const [opacity, setOpacity] = useState(1);
     const [svgElements, setSvgElements] = useState([]);
     const [isReplaying, setIsReplaying] = useState(false);
-    const [replayIndex, setReplayIndex] = useState(0);
+
 
     const startDrawing = useCallback((e) => {
         e.preventDefault();
         isDrawingRef.current = true;
         const { offsetX, offsetY } = getOffset(e);
-        settingRef.current.points = [{ x: offsetX, y: offsetY }];
+        settingRef.current.points = [{ x: parseInt(offsetX), y: parseInt(offsetY) }];
         setSvgElements((prev) => [...prev, { type: 'polyline', points: settingRef.current.points }]);
     }, []);
 
     const moveDraw = (e) => {
         if (!isDrawingRef.current) return;
         const { offsetX, offsetY } = getOffset(e);
-        const newPoint = { x: offsetX, y: offsetY };
+        const newPoint = { x: parseInt(offsetX), y: parseInt(offsetY) };
+  
         settingRef.current.points.push(newPoint);
+ 
         setSvgElements((prev) => {
             const lastElement = prev[prev.length - 1];
             if (lastElement && lastElement.type === 'polyline') {
@@ -74,27 +76,31 @@ const Draw = () => {
         setCurrentIndex(currentIndexRef.current);
     };
 
+    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
     const restoreCanvas = (isReplay = false) => {
         if (isReplay) {
-            // Clear existing elements for replay
             setSvgElements([]);
-            let index = 0;
 
-            const playNextAction = () => {
-                if (index < actions.current.length) {
-                    const action = actions.current[index];
-                    setSvgElements(prev => [
-                        ...prev,
-                        { type: 'polyline', points: action.points, color: action.color }
-                    ]);
-                    index++;
-                    setTimeout(playNextAction, 100); // Set time for the next action
-                } else {
-                    setIsReplaying(false);
+            const playNextPoint = async () => {
+                for (let  i=0;i< actions.current.length;i++) {
+                    let action = actions.current[i];
+                    let curPoints =[];
+                    for (const point of action.points) {
+                        curPoints.push(point);
+                        setSvgElements(prev => {
+                            prev.splice(i,1);
+                            return [
+                            ...prev,
+                            { type: 'polyline', points: curPoints, color: action.color }
+                        ]});
+                        await sleep(50); // Adjust the timing as needed
+                    }
                 }
+                setIsReplaying(false);
             };
 
-            playNextAction(); // Start the sequence
+            playNextPoint(); // Start the sequence
         } else {
             // Restore all elements without animation
             setSvgElements([]);
@@ -162,12 +168,10 @@ const Draw = () => {
     const replayDrawing = () => {
         if (isReplaying) {
             setIsReplaying(false);
-            setReplayIndex(0);
             return;
         }
 
         setIsReplaying(true);
-        setReplayIndex(0);
         restoreCanvas(true); // Trigger replay mode
     };
 
