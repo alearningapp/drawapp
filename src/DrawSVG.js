@@ -1,159 +1,178 @@
-import React, { useRef, useState, useCallback } from 'react';
-import './DrawSVG.css'; // Import CSS styles
+import React, { useRef, useEffect, useState, useCallback } from 'react';
+import ColorPicker from './ColorPicker';
+import ButtonContainer from './ButtonContainer';
+import CursorIcon from './CursorIcon';
+import './DrawSVG.css';
+import TextList from './TextList';
 
-const DrawSVG = () => {
+const Draw = () => {
     const svgRef = useRef(null);
-    const [paths, setPaths] = useState([]);
-    const [currentPath, setCurrentPath] = useState([]);
+    const cursorRef = useRef(null);
+    const settingRef = useRef({ color: 'black', penWidth: 5, opacity: 1 });
+    const isDrawingRef = useRef(false);
+    const actions = useRef([]);
+    const [actionsLen, setActionsLen] = useState(0);
+    const currentIndexRef = useRef(-1);
+    const [currentIndex, setCurrentIndex] = useState(-1);
+    const [selectedColor, setSelectedColor] = useState('black');
     const [penWidth, setPenWidth] = useState(5);
     const [opacity, setOpacity] = useState(1);
-    const [penType, setPenType] = useState('solid');
-    const [selectedColor, setSelectedColor] = useState('black');
-    const [currentIndex, setCurrentIndex] = useState(-1);
-    const [isReplaying, setIsReplaying] = useState(false);
-    const [isDrawing, setIsDrawing] = useState(false); // Track drawing state
+    const [svgElements, setSvgElements] = useState([]);
 
     const startDrawing = useCallback((e) => {
         e.preventDefault();
+        if (!svgRef.current) return; // Check if svgRef is available
+        isDrawingRef.current = true;
         const { offsetX, offsetY } = getOffset(e);
-        setCurrentPath([{ x: offsetX, y: offsetY }]);
-        setIsDrawing(true); // Set drawing state to true
+        settingRef.current.points = [{ x: offsetX, y: offsetY }];
+        setSvgElements((prev) => [...prev, { type: 'polyline', points: settingRef.current.points }]);
     }, []);
 
-    const draw = (e) => {
-        if (!isDrawing || currentPath.length === 0) return; // Check if drawing is active
-
+    const moveDraw = (e) => {
+        if (!isDrawingRef.current || !svgRef.current) return; // Check if svgRef is available
         const { offsetX, offsetY } = getOffset(e);
-        setCurrentPath((prev) => [...prev, { x: offsetX, y: offsetY }]);
+        const newPoint = { x: offsetX, y: offsetY };
+        settingRef.current.points.push(newPoint);
+        setSvgElements((prev) => {
+            const lastElement = prev[prev.length - 1];
+            if (lastElement && lastElement.type === 'polyline') {
+                lastElement.points.push(newPoint); // Update last polyline's points
+                return [...prev]; // Return updated array
+            }
+            return [...prev, { type: 'polyline', points: [newPoint] }];
+        });
     };
 
     const stopDrawing = () => {
-        if (currentPath.length > 0) {
-            const newPath = {
-                points: currentPath,
-                width: penWidth,
-                opacity,
-                penType,
-                color: selectedColor,
-            };
-            const newPaths = [...paths.slice(0, currentIndex + 1), newPath];
-            setPaths(newPaths);
-            setCurrentIndex(newPaths.length - 1);
-            setCurrentPath([]);
-        }
-        setIsDrawing(false); // Set drawing state to false
+        console.log('stop')
+        if (!isDrawingRef.current) return;
+        isDrawingRef.current = false;
+        const newAction = {
+            color: selectedColor,
+            points: settingRef.current.points,
+            width: penWidth,
+            opacity: opacity,
+        };
+        saveAction(newAction);
+        settingRef.current.points = [];
     };
 
     const getOffset = (e) => {
         const rect = svgRef.current.getBoundingClientRect();
-        return {
-            offsetX: e.clientX - rect.left,
-            offsetY: e.clientY - rect.top,
-        };
+        const scaleX = svgRef.current.clientWidth / rect.width;
+        const scaleY = svgRef.current.clientHeight / rect.height;
+        const x = (e.clientX - rect.left) * scaleX;
+        const y = (e.clientY - rect.top) * scaleY;
+        return { offsetX: x, offsetY: y };
     };
 
-    const renderPaths = (upToIndex) => {
-        return paths.slice(0, upToIndex + 1).map((path, index) => (
-            <polyline
-                key={index}
-                points={path.points.map(p => `${p.x},${p.y}`).join(' ')}
-                stroke={path.color}
-                strokeWidth={path.width}
-                strokeOpacity={path.opacity}
-                fill="none"
-                style={{ strokeDasharray: path.penType === 'dashed' ? '5,5' : path.penType === 'dotted' ? '1,5' : '0' }}
-            />
-        ));
+    const saveAction = (newAction) => {
+        actions.current.splice(currentIndexRef.current + 1);
+        actions.current.push(newAction);
+        setActionsLen(actions.current.length);
+        currentIndexRef.current = actions.current.length - 1;
+        setCurrentIndex(currentIndexRef.current);
+    };
+
+    const restoreCanvas = () => {
+        setSvgElements([]);
+        actions.current.forEach(action => {
+            setSvgElements(prev => [...prev, { type: 'polyline', points: action.points }]);
+        });
+    };
+
+    useEffect(() => {
+        restoreCanvas();
+    }, [actionsLen]);
+
+    const drawElements = () => {
+        return svgElements.map((element, index) => {
+            if (element.type === 'polyline') {
+                const points = element.points.map(p => `${p.x},${p.y}`).join(' ');
+                return (
+                    <polyline
+                        key={index}
+                        points={points}
+                        stroke={element.color || selectedColor}
+                        strokeWidth={penWidth}
+                        fill="none"
+                        opacity={opacity}
+                    />
+                );
+            }
+            return null;
+        });
+    };
+
+    const drawText = (text) => {
+        // Implement your text drawing logic here
     };
 
     const undo = () => {
         if (currentIndex > 0) {
-            setCurrentIndex(currentIndex - 1);
-            setCurrentPath([]); // Clear current path
+            currentIndexRef.current -= 1;
+            setCurrentIndex(currentIndexRef.current);
+            setActionsLen(actions.current.length);
+            restoreCanvas();
         }
     };
 
     const redo = () => {
-        if (currentIndex < paths.length - 1) {
-            setCurrentIndex(currentIndex + 1);
-            setCurrentPath([]); // Clear current path
+        if (currentIndex < actionsLen - 1) {
+            currentIndexRef.current += 1;
+            setCurrentIndex(currentIndexRef.current);
+            setActionsLen(actions.current.length);
+            restoreCanvas();
         }
-    };
-
-    const replayDrawing = async () => {
-        setIsReplaying(true);
-        setCurrentPath([]); // Clear current path before replaying
-
-        for (let i = 0; i <= currentIndex; i++) {
-            const path = paths[i];
-            for (let j = 0; j < path.points.length; j++) {
-                await new Promise((resolve) => {
-                    setTimeout(() => {
-                        setCurrentPath(path.points.slice(0, j + 1)); // Show points one by one
-                        resolve();
-                    }, 100); // Adjust time for speed of drawing
-                });
-            }
-        }
-        setIsReplaying(false);
     };
 
     const resetCanvas = () => {
-        setPaths([]);
+        actions.current = [];
+        setActionsLen(0);
         setCurrentIndex(-1);
-        setCurrentPath([]);
+        setSvgElements([]);
     };
 
     return (
-        <div className="drawing-container">
-            <div className="controls">
-                <label>Pen Width: 
-                    <input type="range" min="1" max="20" value={penWidth} onChange={(e) => setPenWidth(e.target.value)} />
-                </label>
-                <label>Opacity: 
-                    <input type="range" min="0" max="1" step="0.1" value={opacity} onChange={(e) => setOpacity(e.target.value)} />
-                </label>
-                <label>Pen Type: 
-                    <select value={penType} onChange={(e) => setPenType(e.target.value)}>
-                        <option value="solid">Solid</option>
-                        <option value="dashed">Dashed</option>
-                        <option value="dotted">Dotted</option>
-                    </select>
-                </label>
-                <label>Color: 
-                    <input type="color" value={selectedColor} onChange={(e) => setSelectedColor(e.target.value)} />
-                </label>
+        <div className="container">
+            <div className="svg-wrapper">
+                <TextList setText={drawText} />
+                <ColorPicker 
+                    selectedColor={selectedColor} 
+                    setSelectedColor={setSelectedColor} 
+                    penWidth={penWidth} 
+                    setPenWidth={setPenWidth} 
+                    opacity={opacity} 
+                    setOpacity={setOpacity} 
+                />
+                <svg
+                    ref={svgRef}
+                    className="svg"
+                    onMouseDown={startDrawing}
+                    onMouseMove={moveDraw}
+                    onMouseUp={stopDrawing}
+                    onTouchStart={startDrawing}
+                    onTouchMove={moveDraw}
+                    onTouchEnd={stopDrawing}
+                    width="100%"
+                    height="100%"
+                    style={{ border: '1px solid black' }}
+                >
+                    {drawElements()}
+                </svg>
+                <div className="cursor" ref={cursorRef}>
+                    <CursorIcon penWidth={penWidth} selectedColor={selectedColor} />
+                </div>
             </div>
-            <svg
-                ref={svgRef}
-                className="drawing-svg"
-                onMouseDown={startDrawing}
-                onMouseMove={draw}
-                onMouseUp={stopDrawing}
-                onMouseLeave={stopDrawing}
-                width="100%"
-                height="500px"
-            >
-                { renderPaths(currentIndex)} {/* Render paths only if not replaying */}
-                {currentPath.length > 0 && (
-                    <polyline
-                        points={currentPath.map(p => `${p.x},${p.y}`).join(' ')}
-                        stroke={selectedColor}
-                        strokeWidth={penWidth}
-                        strokeOpacity={opacity}
-                        fill="none"
-                        style={{ strokeDasharray: penType === 'dashed' ? '5,5' : penType === 'dotted' ? '1,5' : '0' }}
-                    />
-                )}
-            </svg>
-            <div className="button-container">
-                <button onClick={undo} disabled={currentIndex <= 0}>Undo</button>
-                <button onClick={redo} disabled={currentIndex >= paths.length - 1}>Redo</button>
-                <button onClick={replayDrawing} disabled={paths.length === 0 || isReplaying}>Replay</button>
-                <button onClick={resetCanvas}>Reset</button>
-            </div>
+            <ButtonContainer 
+                undo={undo}
+                redo={redo}
+                resetCanvas={resetCanvas}
+                actionsLen={actionsLen}
+                currentIndex={currentIndex}
+            />
         </div>
     );
 };
 
-export default DrawSVG;
+export default Draw;

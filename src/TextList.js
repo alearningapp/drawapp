@@ -24,12 +24,15 @@ const TextList = ({ setText }) => {
     };
 
     fetchCategories();
-
-    window.addEventListener('click', (event) => {
+    const handleClick = (event) => {
       if (!containerRef.current.contains(event.target) ) {
         setIsVisible(false)
       }
-  });
+  };
+    window.addEventListener('click',handleClick );
+  return ()=>{
+      window.removeEventListener('click',handleClick);
+  }
   }, []);
 
   const toggleList = () => setIsVisible(!isVisible);

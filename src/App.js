@@ -1,5 +1,5 @@
 import React from 'react';
-import Draw from './Draw';
+import Draw from './DrawSVG';
 import './App.css';
 
 const App = () => {
