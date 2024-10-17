@@ -4,6 +4,7 @@ import ButtonContainer from './ButtonContainer';
 import CursorIcon from './CursorIcon';
 import './DrawSVG.css';
 import TextList from './TextList';
+import PlayList from './PlayList';
 
 const Draw = () => {
     const svgRef = useRef(null);
@@ -19,6 +20,9 @@ const Draw = () => {
     const [opacity, setOpacity] = useState(1);
     const [svgElements, setSvgElements] = useState([]);
     const [isReplaying, setIsReplaying] = useState(false);
+    const [item,setItem] = useState({text:''});
+
+  
 
     const startDrawing = useCallback((e) => {
         e.preventDefault();
@@ -176,6 +180,8 @@ const Draw = () => {
     return (
         <div className="container">
             <div className="svg-wrapper">
+            <video style={{position:'absolute',top:'0',left:'34px',zIndex:-1}} src={"/video/"+encodeURIComponent(item.text.toLocaleLowerCase())+".mp4"}></video>
+                <PlayList  setItem={setItem}/>
                 <TextList setText={drawText} />
                 <ColorPicker 
                     selectedColor={selectedColor} 
@@ -198,7 +204,18 @@ const Draw = () => {
                     height="100%"
                     style={{ border: '1px solid black' }}
                 >
+                                        <text
+                    x="50%"
+                    y="50%"
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    fill="black"
+                    fontSize="100"
+                >
+                    {item.text}
+                </text>
                     {drawElements()}
+
                 </svg>
                 <div className="cursor" ref={cursorRef}>
                     <CursorIcon penWidth={penWidth} selectedColor={selectedColor} />
