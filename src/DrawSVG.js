@@ -37,14 +37,13 @@ const Draw = () => {
         const lastPoint = settingRef.current.points[settingRef.current.points.length - 1];
         if (!lastPoint || (lastPoint.x !== newPoint.x || lastPoint.y !== newPoint.y)) {
             settingRef.current.points.push(newPoint);
-            console.log(newPoint)
+           let points = [...settingRef.current.points];
             setSvgElements((prev) => {
                 const lastElement = prev[prev.length - 1];
-                if (lastElement && lastElement.type === 'polyline') {
-                    lastElement.points.push(newPoint);
+                lastElement.points.length=0;
+                    lastElement.points.push(...points);
                     return [...prev];
-                }
-                return [...prev, { type: 'polyline', points: [newPoint] }];
+             
             });
         }
     },[]);
