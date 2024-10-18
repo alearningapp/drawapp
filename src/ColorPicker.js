@@ -116,7 +116,7 @@ const ColorSelect = ({
 
   return (
     <>
-      <div ref={ref} style={{ position: 'absolute', top: 0, bottom: 0, left: 0, display: 'flex', zIndex: 1000 }}>
+      <div ref={ref} style={{  top: 0, bottom: 0, left: 0, display: 'flex', zIndex: 1000 }}>
         {isCanvasSettingsOpen && (
           <CanvasSettings  
             penWidth={penWidth} 

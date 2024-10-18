@@ -47,10 +47,8 @@ const Playlist = ({ setItem }) => {
     overflowX: 'auto', // Allows horizontal scrolling
     overflowY: 'hidden', // Disable vertical scrollbar
     whiteSpace: 'nowrap', // Prevents wrapping
-    padding: '10px',
+    padding: '5px',
     borderBottom: '1px solid rgb(204, 204, 204)', // Updated border style
-    position: 'absolute', // Updated position
-    left: '32px', // Updated left position
     right: '0', // Updated right position
     scrollbarWidth: 'thin', // For Firefox
     scrollbarColor: '#888 #f0f0f0', // For Firefox
@@ -58,7 +56,7 @@ const Playlist = ({ setItem }) => {
 
   const playlistItemStyle = (isSelected) => ({
     marginRight: '20px', // Spacing between items
-    padding: '10px',
+    padding: '5px',
     backgroundColor: isSelected ? '#d0e0ff' : '#f0f0f0', // Change background if selected
     borderRadius: '5px', // Optional styling
     cursor: 'pointer', // Change cursor to pointer
