@@ -186,7 +186,7 @@ const Draw = () => {
 
   return (
     <div className="container">
-      <div id="top" style={{ height: "45px",overflow:'hidden' }}>
+      <div id="top" style={{ height: "43px",overflow:'hidden' }}>
         <PlayList setItem={setItem} />
       </div>
       <div id="middle" style={{display:'flex',flexGrow:1,position:'relative'}}>
