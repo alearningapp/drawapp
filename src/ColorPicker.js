@@ -50,57 +50,7 @@ const ColorSelect = ({
     };
   }, []);
 
-  // Scrolling logic
-  useEffect(() => {
-    let initialY = 0;
-    let isScrolling = false;
-    const list = listRef.current;
 
-    const handleStart = (event) => {
-      if (!list) return;
-      initialY = event.touches ? event.touches[0].clientY : event.clientY;
-      isScrolling = true;
-    };
-    
-    const handleMove = (moveEvent) => {
-      if (!isScrolling) return;
-      const currentY = moveEvent.touches ? moveEvent.touches[0].clientY : moveEvent.clientY;
-      const distance = currentY - initialY;
-      const scrollAmount = Math.max(-10, Math.min(10, distance));
-
-      if (scrollAmount !== 0) {
-        list.scrollBy(0, scrollAmount);
-        initialY = currentY;
-
-        // Update scroll position
-        const scrollTop = list.scrollTop;
-        const scrollHeight = list.scrollHeight;
-        const clientHeight = list.clientHeight;
-        const scrollPercent = (scrollTop / (scrollHeight - clientHeight)) * 100;
-        setScrollPosition(scrollPercent);
-      }
-    };
-
-    const handleEnd = () => {
-      isScrolling = false;
-    };
-
-    list.addEventListener('mousedown', handleStart);
-    list.addEventListener('mousemove', handleMove);
-    list.addEventListener('mouseup', handleEnd);
-    list.addEventListener('touchstart', handleStart);
-    list.addEventListener('touchmove', handleMove);
-    list.addEventListener('touchend', handleEnd);
-
-    return () => {
-      list.removeEventListener('mousedown', handleStart);
-      list.removeEventListener('mousemove', handleMove);
-      list.removeEventListener('mouseup', handleEnd);
-      list.removeEventListener('touchstart', handleStart);
-      list.removeEventListener('touchmove', handleMove);
-      list.removeEventListener('touchend', handleEnd);
-    };
-  }, []);
 
   // Styles for the scrollbar indicator
   const scrollbarStyle = {
@@ -127,7 +77,7 @@ const ColorSelect = ({
             setPenType={setPenType} 
           />
         )}
-        <div style={{ padding: '5px', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+        <div style={{ padding: '5px', display: 'flex', flexDirection: 'column', position: 'relative',width:'20px',overflow:'hidden' }}>
           <div
             onClick={() => setIsCanvasSettingsOpen(!isCanvasSettingsOpen)}
             role="button"
@@ -149,7 +99,7 @@ const ColorSelect = ({
             <FontAwesomeIcon style={{ color: selectedColor, height: '20px', backgroundColor: getComplementaryColor(selectedColor) }} icon={faPen} />
           </div>
 
-          <div ref={listRef} style={{ flexGrow: '1', overflow: 'hidden', position: 'relative' }}>
+          <div ref={listRef} style={{ flexGrow: '1', overflow: 'hidden auto', position: 'relative',width: '28px' }}>
            <div style={{position:"absolute"}}>
             <ul style={{
               listStyle: 'none',
@@ -168,7 +118,7 @@ const ColorSelect = ({
                     padding: '10px',
                     cursor: 'pointer',
                     borderRadius: '5px',
-                    border: selectedColor === color ? `2px solid ${color}` : 'none',
+                    borderBottom: selectedColor === color ? `2px solid ${color}` : 'none',
                     boxShadow: selectedColor === color ? `0 0 5px ${color}` : 'none',
                     transition: 'transform 0.1s',
                   }}
@@ -190,7 +140,6 @@ const ColorSelect = ({
                 />
               </li>
             </ul>
-            <div style={scrollbarStyle} /> {/* Scrollbar indicator */}
             </div>
           </div>
         </div>
