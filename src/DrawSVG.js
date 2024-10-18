@@ -189,8 +189,8 @@ const Draw = () => {
       <div id="top" style={{ height: "45px",overflow:'hidden' }}>
         <PlayList setItem={setItem} />
       </div>
-      <div id="middle" style={{display:'flex',flexGrow:1}}>
-        <div id="leftbar" style={{display:'flex'}}>
+      <div id="middle" style={{display:'flex',flexGrow:1,position:'relative'}}>
+        <div id="leftbar" style={{display:'flex',position:'absolute',top:'0',left:'0',height:'100%'}}>
           <ColorPicker
             selectedColor={selectedColor}
             setSelectedColor={setSelectedColor}
