@@ -216,7 +216,7 @@ const Draw = () => {
                 ".mp4"
               }
             ></video>
-            <SvgEditPlayer/>
+            {(false &&<SvgEditPlayer/>)}
             <TextList setText={drawText} />
 
             <svg

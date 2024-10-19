@@ -16,7 +16,12 @@ export default class SvgEditPlayer extends Component {
                 size: 50
             },
             ctrl: false,
-            points: convertSvgPathData("M 234.492 175.869 q 2.113 12.404 0.924 5.352 l 226.166 218.35 a 50 50 0 0 1 300 300"),
+            points: convertSvgPathData(`M 234.492 175.869
+Q 232.113 188.273 230.924 194.221
+L 226.166 218.35
+Q 222.428 236.871 221.068 241.969
+L 218.18 252.504
+`),
             activePoint: 2,
             draggedPoint: false,
             draggedQuadratic: false,
