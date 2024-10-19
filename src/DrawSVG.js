@@ -5,6 +5,7 @@ import CursorIcon from "./CursorIcon";
 import "./DrawSVG.css";
 import TextList from "./TextList";
 import PlayList from "./PlayList";
+import SvgEditPlayer from "./SvgEdit2/SvgPlayer";
 
 const Draw = () => {
   const svgRef = useRef(null);
@@ -215,6 +216,7 @@ const Draw = () => {
                 ".mp4"
               }
             ></video>
+            <SvgEditPlayer/>
             <TextList setText={drawText} />
 
             <svg
@@ -241,6 +243,7 @@ const Draw = () => {
               </text>
               {drawElements()}
             </svg>
+
             <div className="cursor" ref={cursorRef}>
               <CursorIcon penWidth={penWidth} selectedColor={selectedColor} />
             </div>
