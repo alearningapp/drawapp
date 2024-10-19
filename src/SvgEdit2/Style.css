@@ -30,6 +30,8 @@ body {
     width: 100%;
     display: flex;
     background: #fff;
+    position: absolute;
+    top:0
 }
     .ad-Container-main {
         height: 100%;
