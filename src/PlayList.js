@@ -1,81 +1,60 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const Playlist = ({ setItem }) => {
-  const songs = [
-    'A a',
-    'B b',
-    'C c',
-    'D d',
-    'E e',
-    'F f',
-    'G g',
-    'H h',
-    'I i',
-    'J j',
-    'K k',
-    'L l',
-    'M m',
-    'N n',
-    'O o',
-    'P p',
-    'Q q',
-    'R r',
-    'S s',
-    'T t',
-    'U u',
-    'V v',
-    'W w',
-    'X x',
-    'Y y',
-    'Z z',
-    '1 one',
-    '2 two',
-    '3 three',
-    '4 four',
-    '5 five',
-    '6 six',
-    '7 seven',
-    '8 eight',
-    '9 nine',
-    '10 ten',
-  ];
-
+  const [songs, setSongs] = useState([]); // State to hold fetched songs
   const [selectedSong, setSelectedSong] = useState(null);
 
   const playlistContainerStyle = {
     display: 'flex',
-    overflowX: 'auto', // Allows horizontal scrolling
-    overflowY: 'hidden', // Disable vertical scrollbar
-    whiteSpace: 'nowrap', // Prevents wrapping
+    overflowX: 'auto',
+    overflowY: 'hidden',
+    whiteSpace: 'nowrap',
     padding: '5px',
-    borderBottom: '1px solid rgb(204, 204, 204)', // Updated border style
-    right: '0', // Updated right position
-    scrollbarWidth: 'thin', // For Firefox
-    scrollbarColor: '#888 #f0f0f0', // For Firefox
+    borderBottom: '1px solid rgb(204, 204, 204)',
+    right: '0',
+    scrollbarWidth: 'thin', 
+    scrollbarColor: '#888 #f0f0f0', 
   };
 
   const playlistItemStyle = (isSelected) => ({
-    marginRight: '20px', // Spacing between items
+    marginRight: '20px',
     padding: '5px',
-    backgroundColor: isSelected ? '#d0e0ff' : '#f0f0f0', // Change background if selected
-    borderRadius: '5px', // Optional styling
-    cursor: 'pointer', // Change cursor to pointer
+    backgroundColor: isSelected ? '#d0e0ff' : '#f0f0f0',
+    borderRadius: '5px',
+    cursor: 'pointer',
   });
 
   const handleItemClick = (song) => {
-    setSelectedSong(song); // Set the selected song
+    setSelectedSong(song);
     if (setItem) {
-      setItem({text:song}); // Call setItem with the selected song
+      setItem({ text: song });
     }
   };
+
+  useEffect(() => {
+    const fetchSongs = async () => {
+      try {
+        const response = await fetch('/api/songs.json'); // Updated URL
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        setSongs(data); // Assuming data is an array of song names
+      } catch (error) {
+        console.error('Failed to fetch songs:', error);
+      }
+    };
+
+    fetchSongs();
+  }, []); // Empty dependency array means this runs once on mount
 
   return (
     <div style={playlistContainerStyle} className="playlist-container">
       {songs.map((song, index) => (
         <div 
-          style={playlistItemStyle(selectedSong === song)} // Determine if the item is selected
+          style={playlistItemStyle(selectedSong === song)} 
           key={index} 
-          onClick={() => handleItemClick(song)} // Handle item click
+          onClick={() => handleItemClick(song)}
         >
           {song}
         </div>
@@ -83,17 +62,17 @@ const Playlist = ({ setItem }) => {
       <style>
         {`
           .playlist-container::-webkit-scrollbar {
-            height: 8px; /* Height of horizontal scrollbar */
+            height: 8px;
           }
           .playlist-container::-webkit-scrollbar-track {
-            background: #f0f0f0; /* Background of the scrollbar track */
+            background: #f0f0f0;
           }
           .playlist-container::-webkit-scrollbar-thumb {
-            background: #888; /* Color of the scrollbar thumb */
-            border-radius: 5px; /* Rounded corners */
+            background: #888;
+            border-radius: 5px;
           }
           .playlist-container::-webkit-scrollbar-thumb:hover {
-            background: #555; /* Color on hover */
+            background: #555;
           }
         `}
       </style>
