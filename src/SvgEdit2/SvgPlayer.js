@@ -49,43 +49,56 @@ export default class SvgEditPlayer extends Component {
     }
 
     positiveNumber(n) {
-        n = parseInt(n, 10);
-        return isNaN(n) || n < 0 ? 0 : n;
+        n = parseInt(n)
+        if (isNaN(n) || n < 0) n = 0
+
+        return n
     }
 
     setWidth = (e) => {
-        const v = Math.max(this.positiveNumber(e.target.value), 1);
-        this.setState({ w: v });
+        let v = this.positiveNumber(e.target.value), min = 1
+        if (v < min) v = min
+
+        this.setState({ w: v })
     };
 
     setHeight = (e) => {
-        const v = Math.max(this.positiveNumber(e.target.value), 1);
-        this.setState({ h: v });
+        let v = this.positiveNumber(e.target.value), min = 1
+        if (v < min) v = min
+
+        this.setState({ h: v })
     };
 
     setGridSize = (e) => {
-        const grid = { ...this.state.grid };
-        const v = this.positiveNumber(e.target.value);
-        const min = 1;
-        const max = Math.min(this.state.w, this.state.h);
-        grid.size = Math.min(Math.max(v, min), max / 2);
-        this.setState({ grid });
+        let grid = this.state.grid
+        let v = this.positiveNumber(e.target.value)
+        let min = 1
+        let max = Math.min(this.state.w, this.state.h)
+
+        if (v < min) v = min
+        if (v >= max) v = max / 2
+
+        grid.size = v
+
+        this.setState({ grid })
     };
 
     setGridSnap = (e) => {
-        this.setState(prevState => ({
-            grid: { ...prevState.grid, snap: e.target.checked }
-        }));
+        let grid = this.state.grid
+        grid.snap = e.target.checked
+
+        this.setState({ grid })
     };
 
     setGridShow = (e) => {
-        this.setState(prevState => ({
-            grid: { ...prevState.grid, show: e.target.checked }
-        }));
+        let grid = this.state.grid
+        grid.show = e.target.checked
+
+        this.setState({ grid })
     };
 
     setClosePath = (e) => {
-        this.setState({ closePath: e.target.checked });
+        this.setState({ closePath: e.target.checked })
     };
 
     getMouseCoords = (e) => {
@@ -100,41 +113,32 @@ export default class SvgEditPlayer extends Component {
 
         return { x, y };
     };
-    addPoint = (e) => {
-        const coords = this.getMouseCoords(e);
-        this.setState((prevState) => ({
-            points: [...prevState.points, { x: coords.x, y: coords.y }],
-            activePoint: prevState.points.length, // Set the new point as active
-        }));
-    };
-    setDraggedPoint = (index) => {
-        this.setState({ draggedPoint: index });
-    };
-
-    cancelDragging = () => {
-        this.setState({ draggedPoint: null });
-    };
+    
     setPointType = (e) => {
-        const points = [...this.state.points];
-        const active = this.state.activePoint;
+        const points = this.state.points
+        const active = this.state.activePoint
 
+        // not the first point
         if (active !== 0) {
-            const v = e.target.value;
-            // Update point type based on selection
+            let v = e.target.value
+
             switch (v) {
                 case "l":
-                    points[active] = { x: points[active].x, y: points[active].y };
-                    break;
+                    points[active] = {
+                        x: points[active].x,
+                        y: points[active].y
+                    }
+                break
                 case "q":
                     points[active] = {
                         x: points[active].x,
                         y: points[active].y,
                         q: {
                             x: (points[active].x + points[active - 1].x) / 2,
-                            y: (points[active].y + points[active - 1].y) / 2,
-                        },
-                    };
-                    break;
+                            y: (points[active].y + points[active - 1].y) / 2
+                        }
+                    }
+                break
                 case "c":
                     points[active] = {
                         x: points[active].x,
@@ -142,15 +146,15 @@ export default class SvgEditPlayer extends Component {
                         c: [
                             {
                                 x: (points[active].x + points[active - 1].x - 50) / 2,
-                                y: (points[active].y + points[active - 1].y) / 2,
+                                y: (points[active].y + points[active - 1].y) / 2
                             },
                             {
                                 x: (points[active].x + points[active - 1].x + 50) / 2,
-                                y: (points[active].y + points[active - 1].y) / 2,
-                            },
-                        ],
-                    };
-                    break;
+                                y: (points[active].y + points[active - 1].y) / 2
+                            }
+                        ]
+                    }
+                break
                 case "a":
                     points[active] = {
                         x: points[active].x,
@@ -160,41 +164,151 @@ export default class SvgEditPlayer extends Component {
                             ry: 50,
                             rot: 0,
                             laf: 1,
-                            sf: 1,
-                        },
-                    };
-                    break;
-                default:
-                    break;
+                            sf: 1
+                        }
+                    }
+                break
             }
-            this.setState({ points });
+
+            this.setState({ points })
         }
     };
 
     setPointPosition = (coord, e) => {
-        const coords = { ...this.state.points[this.state.activePoint] };
-        const v = this.positiveNumber(e.target.value);
+        let coords = this.state.points[this.state.activePoint]
+        let v = this.positiveNumber(e.target.value)
 
-        if (coord === "x" && v > this.state.w) v = this.state.w;
-        if (coord === "y" && v > this.state.h) v = this.state.h;
+        if (coord === "x" && v > this.state.w) v = this.state.w
+        if (coord === "y" && v > this.state.h) v = this.state.h
 
-        coords[coord] = v;
-        this.setPointCoords(coords);
+        coords[coord] = v
+
+        this.setPointCoords(coords)
+    };
+
+    setQuadraticPosition = (coord, e) => {
+        let coords = this.state.points[this.state.activePoint].q
+        let v = this.positiveNumber(e.target.value)
+
+        if (coord === "x" && v > this.state.w) v = this.state.w
+        if (coord === "y" && v > this.state.h) v = this.state.h
+
+        coords[coord] = v
+
+        this.setQuadraticCoords(coords)
+    };
+
+    setCubicPosition = (coord, anchor, e) => {
+        let coords = this.state.points[this.state.activePoint].c[anchor]
+        let v = this.positiveNumber(e.target.value)
+
+        if (coord === "x" && v > this.state.w) v = this.state.w
+        if (coord === "y" && v > this.state.h) v = this.state.h
+
+        coords[coord] = v
+
+        this.setCubicCoords(coords, anchor)
     };
 
     setPointCoords = (coords) => {
-        const points = [...this.state.points];
-        const active = this.state.activePoint;
+        const points = this.state.points
+        const active = this.state.activePoint
 
-        points[active].x = coords.x;
-        points[active].y = coords.y;
+        points[active].x = coords.x
+        points[active].y = coords.y
 
-        this.setState({ points });
+        this.setState({ points })
     };
+
+    setQuadraticCoords = (coords) => {
+        const points = this.state.points
+        const active = this.state.activePoint
+
+        points[active].q.x = coords.x
+        points[active].q.y = coords.y
+
+        this.setState({ points })
+    };
+
+    setArcParam = (param, e) => {
+        const points = this.state.points
+        const active = this.state.activePoint
+        let v
+
+        if (["laf", "sf"].indexOf(param) > -1) {
+            v = e.target.checked ? 1 : 0
+        } else {
+            v = this.positiveNumber(e.target.value)
+        }
+
+        points[active].a[param] = v
+
+        this.setState({ points })
+    };
+
+    setCubicCoords = (coords, anchor) => {
+        const points = this.state.points
+        const active = this.state.activePoint
+
+        points[active].c[anchor].x = coords.x
+        points[active].c[anchor].y = coords.y
+
+        this.setState({ points })
+    };
+
+    setDraggedPoint = (index) => {
+        if (!this.state.shiftKey) {
+            this.setState({
+                activePoint: index,
+                draggedPoint: true
+            })
+        }
+    };
+
+    setDraggedQuadratic = (index) => {
+        if (!this.state.shiftKey) {
+            this.setState({
+                activePoint: index,
+                draggedQuadratic: true
+            })
+        }
+    };
+
+    setDraggedCubic = (index, anchor) => {
+        if (!this.state.shiftKey) {
+            this.setState({
+                activePoint: index,
+                draggedCubic: anchor
+            })
+        }
+    };
+
+    cancelDragging = (e) => {
+        this.setState({
+            draggedPoint: false,
+            draggedQuadratic: false,
+            draggedCubic: false
+        })
+    };
+
+    addPoint = (e) => {
+        if (this.state.shiftKey) {
+            let coords = this.getMouseCoords(e)
+            let points = this.state.points
+
+            points.push(coords)
+
+            this.setState({
+                points,
+                activePoint: points.length - 1
+            })
+        }
+    };
+
     removeActivePoint = (e) => {
         let points = this.state.points
         let active = this.state.activePoint
-        
+
         if (points.length > 1 && active !== 0) {
             points.splice(active, 1)
 
@@ -204,76 +318,76 @@ export default class SvgEditPlayer extends Component {
             })
         }
     };
-    generatePath() {
-        const { points, closePath } = this.state;
-        let d = "";
 
-        points.forEach((p, i) => {
-            if (i === 0) {
-                d += "M ";
-            } else if (p.q) {
-                d += `Q ${p.q.x} ${p.q.y} `;
-            } else if (p.c) {
-                d += `C ${p.c[0].x} ${p.c[0].y} ${p.c[1].x} ${p.c[1].y} `;
-            } else if (p.a) {
-                d += `A ${p.a.rx} ${p.a.ry} ${p.a.rot} ${p.a.laf} ${p.a.sf} `;
-            } else {
-                d += "L ";
+    handleMouseMove = (e) => {
+        if (!this.state.shiftKey) {
+            if (this.state.draggedPoint) {
+                this.setPointCoords(this.getMouseCoords(e))
+            } else if (this.state.draggedQuadratic) {
+                this.setQuadraticCoords(this.getMouseCoords(e))
+            } else if (this.state.draggedCubic !== false) {
+                this.setCubicCoords(this.getMouseCoords(e), this.state.draggedCubic)
             }
-            d += `${p.x} ${p.y} `;
-        });
-
-        if (closePath) d += "Z";
-
-        return d;
-    }
-
-    reset = () => {
-        const w = this.state.w;
-        const h = this.state.h;
-        const points = [{ x: w / 2, y: h / 2 }];
-
-        this.setState({
-            points,
-            activePoint: 0,
-        });
-    };
-
-    restoreDefaults = () => {
+        }
     };
 
     handleKeyDown = (e) => {
-        if (e.shiftKey) this.setState({ shiftKey: true });
+        if (e.shiftKey) this.setState({ shiftKey: true })
     };
 
     handleKeyUp = (e) => {
-        if (!e.shiftKey) this.setState({ shiftKey: false });
+        if (!e.shiftKey) this.setState({ shiftKey: false })
     };
-    handleMouseMove = (e) => {
-        if (!this.state.shiftKey) {
-            const coords = this.getMouseCoords(e);
-            if (this.state.draggedPoint) {
-                this.setPointCoords(coords);
-            } else if (this.state.draggedQuadratic) {
-                this.setQuadraticCoords(coords);
-            } else if (this.state.draggedCubic !== false) {
-                this.setCubicCoords(coords, this.state.draggedCubic);
-            }
-        }
-    };
-    setDraggedCubic = (index) => {
-        this.setState({ draggedCubic: index });
-    };
-    setCubicCoords(e) {
-        const coords = this.getMouseCoords(e);
-        const points = [...this.state.points];
-        const activeCubicIndex = this.state.draggedCubic;
 
-        if (points[activeCubicIndex].c) {
-            points[activeCubicIndex].c[1] = { x: coords.x, y: coords.y }; // Update second control point for cubic
-            this.setState({ points });
-        }
+    generatePath() {
+        let { points, closePath } = this.state
+        let d = ""
+
+        points.forEach((p, i) => {
+            if (i === 0) {
+                // first point
+                d += "M "
+            } else if (p.q) {
+                // quadratic
+                d += `Q ${ p.q.x } ${ p.q.y } `
+            } else if (p.c) {
+                // cubic
+                d += `C ${ p.c[0].x } ${ p.c[0].y } ${ p.c[1].x } ${ p.c[1].y } `
+            } else if (p.a) {
+                // arc
+                d += `A ${ p.a.rx } ${ p.a.ry } ${ p.a.rot } ${ p.a.laf } ${ p.a.sf } `
+            } else {
+                d += "L "
+            }
+
+            d += `${ p.x } ${ p.y } `
+        })
+
+        if (closePath) d += "Z"
+
+        return d
     }
+
+    reset = (e) => {
+        const state = this.state;
+        const w = state.w;
+        const h = state.h;
+        const points = this.state.points;
+
+        points.splice(0, points.length);
+        points.push({ x: w / 2, y: h / 2 });
+
+        state.points = points;
+        state.activePoint = points.length - 1;
+
+        this.setState(state);
+    };
+
+    restoreDefaults = (e) => {
+
+    };
+
+
     render() {
         return (
             <div className="ad-Container" onMouseUp={this.cancelDragging}>
@@ -293,19 +407,21 @@ export default class SvgEditPlayer extends Component {
                 </div>
 
                 <div className="ad-Container-controls">
-                    <Controls
-                        {...this.state}
-                        reset={this.reset}
-                        restoreDefaults={this.restoreDefaults}
-                        removeActivePoint={this.removeActivePoint}
-                        setPointPosition={this.setPointPosition}
-                        setWidth={this.setWidth}
-                        setHeight={this.setHeight}
-                        setGridSize={this.setGridSize}
-                        setGridSnap={this.setGridSnap}
-                        setGridShow={this.setGridShow}
-                        setClosePath={this.setClosePath}
-                    />
+                <Controls
+                        { ...this.state }
+                        reset={ this.reset }
+                        removeActivePoint={ this.removeActivePoint }
+                        setPointPosition={ this.setPointPosition }
+                        setQuadraticPosition={ this.setQuadraticPosition }
+                        setCubicPosition={ this.setCubicPosition }
+                        setArcParam={ this.setArcParam }
+                        setPointType={ this.setPointType }
+                        setWidth={ this.setWidth }
+                        setHeight={ this.setHeight }
+                        setGridSize={ this.setGridSize }
+                        setGridSnap={ this.setGridSnap }
+                        setGridShow={ this.setGridShow }
+                        setClosePath={ this.setClosePath } />
                     <Result path={this.generatePath()} />
                 </div>
             </div>
