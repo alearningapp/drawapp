@@ -5,7 +5,14 @@ import CursorIcon from "./CursorIcon";
 import "./DrawSVG.css";
 import TextList from "./TextList";
 import PlayList from "./PlayList";
+import WordTrack from "./WordTrack";
 import SvgEditPlayer from "./SvgEdit2/SvgPlayer";
+
+const paths = [
+    { d: "M10 80 Q 95 10 180 80", cx: 10, cy: 80 },
+    { d: "M20 90 Q 100 30 200 90", cx: 20, cy: 90 },
+    // Add more paths as needed
+  ];
 
 const Draw = () => {
   const svgRef = useRef(null);
@@ -201,8 +208,8 @@ const Draw = () => {
             setOpacity={setOpacity}
           />
         </div>
-        <div id="right" style={{flexGrow:1,display:'flex'}}>
-          <div className="svg-wrapper" style={{border:'1px solid #ccc'}}>
+        <div id="right" style={{flexGrow:1,display:'flex',marginLeft:'30px',position:'relative'}}>
+          <div className="svg-wrapper" style={{border:'1px solid #ccc',position:'absolute',left:0,right:0,top:0,bottom:0,overflow:'hidden'}}>
             <video
               style={{
                 position: "absolute",
@@ -218,7 +225,7 @@ const Draw = () => {
             ></video>
             {(false &&<SvgEditPlayer/>)}
             <TextList setText={drawText} />
-
+            <WordTrack paths={paths} />
             <svg
               ref={svgRef}
               className="svg"

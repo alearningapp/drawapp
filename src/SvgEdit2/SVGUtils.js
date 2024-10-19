@@ -97,7 +97,7 @@ export function createStrokeJSON(xmlString) {
     const xmlDoc = parser.parseFromString(xmlString, "application/xml");
 
     // Extract the word
-    const word = xmlDoc.getElementsByTagName("word")[0].textContent;
+    const word = xmlDoc.getElementsByTagName("Word")[0].getAttribute('unicode');
 
     // Extract strokes
     const strokes = Array.from(xmlDoc.getElementsByTagName("Stroke")).map(stroke => {
