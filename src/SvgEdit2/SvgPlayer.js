@@ -3,6 +3,7 @@ import SVG from "./SVG"; // Ensure this component exists
 import Controls from "./Controls"; // Ensure this component exists
 import Result from "./Result"; // Ensure this component exists
 import  './Style.css';
+import {convertSvgPathData} from './SVGUtils';
 export default class SvgEditPlayer extends Component {
     constructor(props) {
         super(props);
@@ -15,15 +16,7 @@ export default class SvgEditPlayer extends Component {
                 size: 50
             },
             ctrl: false,
-            points: [
-                { x: 100, y: 300 },
-                { x: 200, y: 300, q: { x: 150, y: 50 } },
-                { x: 300, y: 300, q: { x: 250, y: 550 } },
-                { x: 400, y: 300, q: { x: 350, y: 50 } },
-                { x: 500, y: 300, c: [{ x: 450, y: 550 }, { x: 450, y: 50 }] },
-                { x: 600, y: 300, c: [{ x: 550, y: 50 }, { x: 550, y: 550 }] },
-                { x: 700, y: 300, a: { rx: 50, ry: 50, rot: 0, laf: 1, sf: 1 } }
-            ],
+            points: convertSvgPathData("M 234.492 175.869 q 2.113 12.404 0.924 5.352 l 226.166 218.35 a 50 50 0 0 1 300 300"),
             activePoint: 2,
             draggedPoint: false,
             draggedQuadratic: false,
