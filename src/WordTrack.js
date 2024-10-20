@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { createStrokeJSON } from './SvgEdit2/SVGUtils'; // Import the function
 
-const WordTrack = () => {
+const WordTrack = ({item}) => {
   const [word, setWord] = useState({});
   const [playedIndex,setPlayedIndex] = useState(-1);
   const [points,setPoints] = useState([]);
-  const wordRef = useRef(null)
+  const wordRef = useRef(null);
+
 
   const scaleStroke = (stroke,scaleFactor,pointFactor) => {
     stroke.d=stroke.d.replace(/([MLHVCSQTAZ])|(-?\d+(\.\d+)?)/g, (match, command, number) => {
@@ -50,7 +50,7 @@ const WordTrack = () => {
   const playStokes = useCallback(async() =>{
 
     const word = wordRef.current;
-    if(word.stroke) for(let i=0;i<word.stroke.length;i++){
+    if(word?.stroke) for(let i=0;i<word.stroke.length;i++){
         let stroke = word.stroke[i];
         setPoints([]);
        let spoints = pointsSmooth(stroke.track);
@@ -63,11 +63,15 @@ const WordTrack = () => {
   });
 
   useEffect(() => {
+    wordRef.current=null;
+    setWord({})
     const fetchPaths = async () => {
       try {
-        const response = await fetch('/api/stroke/4E11.json');
+       let t= item.text.charCodeAt(0).toString(16).toUpperCase();
+        const response = await fetch(`/api/stroke/${t}.json`);
         if (!response.ok) {
-          throw new Error('Network response was not ok');
+          return; 
+          //throw new Error('Network response was not ok');
         }
         
        // const xmlString = await response.text(); // Get the XML string
@@ -92,7 +96,7 @@ const WordTrack = () => {
     })();
 
 
-  }, []); // Empty dependency array to run once on mount
+  }, [item]); // Empty dependency array to run once on mount
 
 
 

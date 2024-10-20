@@ -225,7 +225,7 @@ const Draw = () => {
             ></video>
             {(false &&<SvgEditPlayer/>)}
             <TextList setText={drawText} />
-            <WordTrack paths={paths} />
+            <WordTrack item={item} />
             <svg
               ref={svgRef}
               className="svg"
