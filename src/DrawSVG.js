@@ -7,7 +7,7 @@ import TextList from "./TextList";
 import PlayList from "./PlayList";
 import WordTrack from "./WordTrack";
 import SvgEditPlayer from "./SvgEdit2/SvgPlayer";
-
+import ModeSwitchButton from './ModeSwitchButton';
 const paths = [
     { d: "M10 80 Q 95 10 180 80", cx: 10, cy: 80 },
     { d: "M20 90 Q 100 30 200 90", cx: 20, cy: 90 },
@@ -255,6 +255,7 @@ const Draw = () => {
               <CursorIcon penWidth={penWidth} selectedColor={selectedColor} />
             </div>
           </div>
+            <ModeSwitchButton/>
         </div>
       </div>
       <div id="bottom">

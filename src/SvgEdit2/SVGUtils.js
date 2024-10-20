@@ -125,11 +125,11 @@ export function createStrokeJSON(xmlString) {
         });
 
         // Create track string from track points
-        const track = trackPoints.map(point => `${point.getAttribute("x")},${point.getAttribute("y")}`).join(', ');
+        const track = trackPoints.map(point => [point.getAttribute("x"),point.getAttribute("y")]);
 
         return {
-            path: path.trim(),
-            track: track
+            d: path.trim(),
+            ps: track
         };
     });
 
