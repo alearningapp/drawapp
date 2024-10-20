@@ -6,7 +6,7 @@ VERSION=`git branch --show-current`
 dest='../alearingapp.github.io/learning'
 
 
-GENERATE_SOURCEMAP=false BUILD_PATH=${dest}/${VERSION} PUBLIC_URL=./ npm run build
+GENERATE_SOURCEMAP=false BUILD_PATH=${dest}/${VERSION} PUBLIC_URL=./ npm run build -output-hashing=none
 
 #(cd ${dest}  && git pull --rebase)
 
