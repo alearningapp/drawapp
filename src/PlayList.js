@@ -25,9 +25,18 @@ const Playlist = ({ setItem }) => {
   });
 
   const handleItemClick = (song) => {
-    setSelectedSong(song);
-    if (setItem) {
-      setItem({ text: song });
+    if (selectedSong === song) {
+      // Deselect if the song is already selected
+      setSelectedSong(null);
+      if (setItem) {
+        setItem(null); // Clear the selection in parent component
+      }
+    } else {
+      // Select the new song
+      setSelectedSong(song);
+      if (setItem) {
+        setItem({ text: song });
+      }
     }
   };
 

@@ -28,7 +28,7 @@ const Draw = () => {
   const [opacity, setOpacity] = useState(1);
   const [svgElements, setSvgElements] = useState([]);
   const [isReplaying, setIsReplaying] = useState(false);
-  const [item, setItem] = useState({ text: "" });
+  const [item, setItem] = useState(null);
 
   const startDrawing = useCallback((e) => {
     e.preventDefault();
@@ -217,11 +217,7 @@ const Draw = () => {
                 left: "34px",
                 zIndex: -1,
               }}
-              src={
-                "/video/" +
-                encodeURIComponent(item.text.toLocaleLowerCase()) +
-                ".mp4"
-              }
+       
             ></video>
             {(false &&<SvgEditPlayer/>)}
             <TextList setText={drawText} />
@@ -238,7 +234,7 @@ const Draw = () => {
               width="100%"
               height="100%"
             >
-              <text
+              {item&&<text
                 x="50%"
                 y="50%"
                 textAnchor="middle"
@@ -247,7 +243,7 @@ const Draw = () => {
                 fontSize="100"
               >
                 {item.text}
-              </text>
+              </text>}
               {drawElements()}
             </svg>
 

@@ -90,9 +90,12 @@ const WordTrack = ({item}) => {
     };
 
     (async()=>{
-      await fetchPaths();
-      console.log(word)
-      playStokes();
+      if(item){
+        await fetchPaths();
+        console.log(word)
+        playStokes();
+      }
+
     })();
 
 
