@@ -3,7 +3,7 @@
 
 VERSION=`git branch --show-current`
 
-dest='../alearingapp.github.io/learning'
+dest='../alearningapp.github.io/learning'
 
 
 GENERATE_SOURCEMAP=false BUILD_PATH=${dest}/${VERSION} PUBLIC_URL=./ npm run build2 -output-hashing=none
