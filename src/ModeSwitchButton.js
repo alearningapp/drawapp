@@ -1,7 +1,15 @@
 import React, { useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faMusic, faPaintBrush, faVideo, faGamepad } from '@fortawesome/free-solid-svg-icons';
 
 const ModeSwitchButton = () => {
-  const modes = ['Track', 'Draw', 'Video', 'Game'];
+  const modes = [
+    { icon: faMusic, name: 'Track' },
+    { icon: faPaintBrush, name: 'Draw' },
+    { icon: faVideo, name: 'Video' },
+    { icon: faGamepad, name: 'Game' },
+  ];
+  
   const [currentModeIndex, setCurrentModeIndex] = useState(0);
 
   const toggleMode = () => {
@@ -11,9 +19,8 @@ const ModeSwitchButton = () => {
   return (
     <div style={styles.container}>
       <button onClick={toggleMode} style={styles.button}>
-        Switch to {modes[(currentModeIndex + 1) % modes.length]} Mode
+        <FontAwesomeIcon icon={modes[currentModeIndex].icon} size="lg" />
       </button>
-      <p style={styles.text}>Current Mode: {modes[currentModeIndex]}</p>
     </div>
   );
 };
@@ -26,23 +33,18 @@ const styles = {
     position: 'absolute',
     right: 0,
     bottom: 0,
-    padding: '20px', // Optional padding for better visibility
-    backgroundColor: 'rgba(255, 255, 255, 0.8)', // Optional background
-    borderRadius: '10px', // Optional border radius
   },
   button: {
-    padding: '10px 20px',
-    fontSize: '16px',
+    width: '40px',
+    height: '40px',
     cursor: 'pointer',
     border: 'none',
     borderRadius: '5px',
     backgroundColor: '#4CAF50',
-    color: '#fff',
     transition: 'background-color 0.3s',
-  },
-  text: {
-    marginTop: '10px',
-    fontSize: '18px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 };
 
