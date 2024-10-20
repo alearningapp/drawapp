@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-
 const WordTrack = ({item}) => {
   const [word, setWord] = useState({});
   const [playedIndex,setPlayedIndex] = useState(-1);
@@ -63,6 +62,7 @@ const WordTrack = ({item}) => {
   });
 
   useEffect(() => {
+
     wordRef.current=null;
     setWord({})
     const fetchPaths = async () => {
