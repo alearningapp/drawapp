@@ -1,4 +1,16 @@
-GENERATE_SOURCEMAP=false npm run build
-(cd ../alearingapp.github.io/  && git pull --rebase)
-cp -a build/* ../alearingapp.github.io/
-(cd ../alearingapp.github.io/ && git add . && git commit -am 'update' && git push)
+#!/bin/sh
+
+
+VERSION=`git branch --show-current`
+
+dest='../alearingapp.github.io/learning'
+
+
+GENERATE_SOURCEMAP=false BUILD_PATH=${dest}/${VERSION} PUBLIC_URL=./ npm run build
+
+#(cd ${dest}  && git pull --rebase)
+
+mkdir -p ${dest}/${VERSION}
+sed -E -i  "s|<base href=\"[^\"]*?\">|<base href=\"/learning/${VERSION}/\">|" ${dest}/../index.html
+#(cd ../${dest} && git add . && git commit -am 'update' && while ! git push ; do echo 'lll';done;)
+echo 'done';
