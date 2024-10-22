@@ -8,11 +8,8 @@ import PlayList from "./PlayList";
 import WordTrack from "./WordTrack";
 import SvgEditPlayer from "./SvgEdit2/SvgPlayer";
 import ModeSwitchButton from './ModeSwitchButton';
-const paths = [
-    { d: "M10 80 Q 95 10 180 80", cx: 10, cy: 80 },
-    { d: "M20 90 Q 100 30 200 90", cx: 20, cy: 90 },
-    // Add more paths as needed
-  ];
+import YoutubePlayer from './YoutubePlayer';
+
 
 const Draw = () => {
   const svgRef = useRef(null);
@@ -20,6 +17,7 @@ const Draw = () => {
   const settingRef = useRef({ color: "black", penWidth: 5, opacity: 1 });
   const isDrawingRef = useRef(false);
   const actions = useRef([]);
+  const [setting,setSetting] = useState({});
   const [actionsLen, setActionsLen] = useState(0);
   const currentIndexRef = useRef(-1);
   const [currentIndex, setCurrentIndex] = useState(-1);
@@ -206,19 +204,13 @@ const Draw = () => {
             setPenWidth={setPenWidth}
             opacity={opacity}
             setOpacity={setOpacity}
+            setting={setting}
+            setSetting={setSetting}
           />
         </div>
         <div id="right" style={{flexGrow:1,display:'flex',marginLeft:'30px',position:'relative'}}>
           <div className="svg-wrapper" style={{border:'1px solid #ccc',position:'absolute',left:0,right:0,top:0,bottom:0,overflow:'hidden'}}>
-            <video
-              style={{
-                position: "absolute",
-                top: "0",
-                left: "34px",
-                zIndex: -1,
-              }}
-       
-            ></video>
+          <YoutubePlayer videoId="EOX784OXmPs" />
             {(false &&<SvgEditPlayer/>)}
             <TextList setText={drawText} />
             <WordTrack item={item} />
