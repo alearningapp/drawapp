@@ -15,7 +15,7 @@ const ModeSwitchButton = ({ settings, setSettings }) => {
       setSettings((prev) => ({ ...prev, drawEnabled: !prev.drawEnabled }));
     } else {
       // Change current mode for other buttons
-      setSettings((prev) => ({ ...prev, currentMode: mode }));
+      setSettings((prev) => ({ ...prev, currentMode: mode.name }));
     }
   };
 

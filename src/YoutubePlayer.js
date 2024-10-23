@@ -1,4 +1,3 @@
-import { height } from '@fortawesome/free-solid-svg-icons/fa0';
 import React, { useEffect, useRef, useState } from 'react';
 
 const YouTubePlayer = ({ videoId }) => {
