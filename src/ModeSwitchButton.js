@@ -1,19 +1,55 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMusic, faPaintBrush, faVideo, faGamepad } from '@fortawesome/free-solid-svg-icons';
 
 const ModeSwitchButton = () => {
   const modes = [
     { icon: faMusic, name: 'Track' },
-    { icon: faPaintBrush, name: 'Draw' },
     { icon: faVideo, name: 'Video' },
     { icon: faGamepad, name: 'Game' },
   ];
 
+  const [settings, setSettings] = useState({
+    currentMode: modes[0], // Default to the first mode
+    drawEnabled: false, // Track draw mode independently
+  });
+
+  const handleButtonClick = (mode) => {
+    if (mode.name === 'Draw') {
+      // Toggle drawEnabled independently
+      setSettings((prev) => ({ ...prev, drawEnabled: !prev.drawEnabled }));
+    } else {
+      // Change current mode for other buttons
+      setSettings((prev) => ({ ...prev, currentMode: mode }));
+    }
+  };
+
   return (
     <div style={styles.container}>
+      {/* Button for Draw mode */}
+      <button
+        style={{
+          ...styles.button,
+          backgroundColor: settings.drawEnabled ? '#388E3C' : '#4CAF50', // Highlight if Draw is enabled
+        }}
+        onClick={() => handleButtonClick({ name: 'Draw' })}
+      >
+        <div style={styles.iconContainer}>
+          <FontAwesomeIcon icon={faPaintBrush} size="sm" />
+          <span style={styles.label}>Draw</span>
+        </div>
+      </button>
+
+      {/* Buttons for other modes */}
       {modes.map((mode, index) => (
-        <button key={index} style={styles.button}>
+        <button
+          key={index}
+          style={{
+            ...styles.button,
+            backgroundColor: mode.name === settings.currentMode.name ? '#388E3C' : '#4CAF50', // Highlight selected mode
+          }}
+          onClick={() => handleButtonClick(mode)}
+        >
           <div style={styles.iconContainer}>
             <FontAwesomeIcon icon={mode.icon} size="sm" />
             <span style={styles.label}>{mode.name}</span>
@@ -35,17 +71,15 @@ const styles = {
   },
   button: {
     width: '40px',
-    height: '60px', // Increased height to fit text below the icon
     cursor: 'pointer',
     border: 'none',
     borderRadius: '5px',
-    backgroundColor: '#4CAF50',
     transition: 'background-color 0.3s',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     margin: '2px 0',
-    padding: '0',
+    padding: '5px',
   },
   iconContainer: {
     display: 'flex',
@@ -53,7 +87,7 @@ const styles = {
     alignItems: 'center',
   },
   label: {
-    marginTop: '2px', // Space between icon and label
+    marginTop: '2px',
     fontSize: '10px',
     color: '#fff',
   },
