@@ -17,7 +17,10 @@ const Draw = () => {
   const settingRef = useRef({ color: "black", penWidth: 5, opacity: 1 });
   const isDrawingRef = useRef(false);
   const actions = useRef([]);
-  const [setting,setSetting] = useState({});
+  const [settings, setSettings] = useState({
+    currentMode: { icon: null, name: 'Track' }, // Default mode
+    drawEnabled: false,
+  });
   const [actionsLen, setActionsLen] = useState(0);
   const currentIndexRef = useRef(-1);
   const [currentIndex, setCurrentIndex] = useState(-1);
@@ -204,8 +207,6 @@ const Draw = () => {
             setPenWidth={setPenWidth}
             opacity={opacity}
             setOpacity={setOpacity}
-            setting={setting}
-            setSetting={setSetting}
           />
         </div>
         <div id="right" style={{flexGrow:1,display:'flex',marginLeft:'30px',position:'relative'}}>
@@ -225,6 +226,7 @@ const Draw = () => {
               onTouchEnd={stopDrawing}
               width="100%"
               height="100%"
+              style={{position:settings.drawEnabled?'absolute':'',left:0}}
             >
               {item&&<text
                 x="50%"
@@ -243,7 +245,7 @@ const Draw = () => {
               <CursorIcon penWidth={penWidth} selectedColor={selectedColor} />
             </div>
           </div>
-            <ModeSwitchButton/>
+            <ModeSwitchButton settings={settings} setSettings={setSettings}/>
         </div>
       </div>
       <div id="bottom">

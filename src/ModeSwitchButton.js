@@ -1,18 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMusic, faPaintBrush, faVideo, faGamepad } from '@fortawesome/free-solid-svg-icons';
 
-const ModeSwitchButton = () => {
+const ModeSwitchButton = ({ settings, setSettings }) => {
   const modes = [
     { icon: faMusic, name: 'Track' },
     { icon: faVideo, name: 'Video' },
     { icon: faGamepad, name: 'Game' },
   ];
-
-  const [settings, setSettings] = useState({
-    currentMode: modes[0], // Default to the first mode
-    drawEnabled: false, // Track draw mode independently
-  });
 
   const handleButtonClick = (mode) => {
     if (mode.name === 'Draw') {
