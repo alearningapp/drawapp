@@ -7,36 +7,84 @@ const YouTubePlayer = ({ videoId }) => {
     const [isPlayerReady, setIsPlayerReady] = useState(false);
     const [videoDuration, setVideoDuration] = useState(0);
     const [currentTime, setCurrentTime] = useState(0);
+    const intervalRef = useRef(null); // Reference for the interval
     const [isPlaying, setIsPlaying] = useState(false);
     const [maxWidth, setMaxWidth] = useState(false);
     const [playerDimensions, setPlayerDimensions] = useState({ height: 0, width: 0 });
 
+
     useEffect(() => {
-        const tag = document.createElement('script');
-        tag.src = 'https://www.youtube.com/iframe_api';
-        const firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+        // Load YouTube IFrame API only once
+        if (!window.YT) {
+            const tag = document.createElement('script');
+            tag.src = 'https://www.youtube.com/iframe_api';
+            const firstScriptTag = document.getElementsByTagName('script')[0];
+            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+        } else {
+            initializePlayer();
+        }
 
+        // Initialize player when API is ready
         window.onYouTubeIframeAPIReady = () => {
-            playerRef.current = new window.YT.Player('player', {
-                height: playerDimensions.height,
-                width: playerDimensions.width,
-                videoId: videoId,
-                events: {
-                    'onReady': onPlayerReady,
-                    'onError': onPlayerError,
-                    'onStateChange': onPlayerStateChange,
-                },
-            });
+            initializePlayer();
         };
-    }, [videoId, playerDimensions]);
 
+        return () => {
+            cleanupPlayer();
+        };
+    }, []); // Run only on mount
+
+    useEffect(() => {
+        if (isPlayerReady) {
+            playerRef?.current?.loadVideoById?.(videoId);
+        }
+    }, [videoId, isPlayerReady]); // Load new video when videoId changes
+
+    const initializePlayer = () => {
+
+        setMaxWidth(containerRef.current.clientWidth/containerRef.current.clientHeight<=16/9);
+        let height = containerRef.current.clientWidth* 9/16;
+        let width = containerRef.current.clientWidth;
+        if(height>containerRef.current.clientHeight){
+            height = '100%';
+            width = containerRef.current.clientHeight*16/9;
+        }
+
+       console.log(width,height)
+
+        playerRef.current = new window.YT.Player('player', {
+            height: height,
+            width: width,
+            videoId: videoId,
+            events: {
+                'onReady': onPlayerReady,
+                'onError': onPlayerError,
+                'onStateChange': onPlayerStateChange,
+            },
+        });
+    };
+
+    const cleanupPlayer = () => {
+        console.log("Cleaning up YouTube player...");
+        if (playerRef.current) {
+            playerRef.current.destroy();
+            playerRef.current = null;
+            console.log("Player destroyed.");
+        }
+        if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+        }
+        setIsPlayerReady(false); // Reset player readiness
+    };
+    
     useEffect(() => {
         const handleResize = () => {
-            const newWidth = containerRef.current.innerWidth;
+            const newWidth = containerRef.current.clientHeight;
             const newHeight = newWidth * (9 / 16); 
-            setMaxWidth(containerRef.current.innerWidth/containerRef.current.innerHeight<9/16);
-            console.log(containerRef.current.innerWidth/containerRef.current.innerHeight<9/16);
+            console.log(newHeight)
+            console.log(containerRef.current.clientWidth,containerRef.current.clientHeight,containerRef.current.clientWidth/containerRef.current.clientHeight<=16/9)
+            setMaxWidth(containerRef.current.clientWidth/containerRef.current.clientHeight<=16/9);
             setPlayerDimensions({ height: newHeight, width: newWidth });
         };
 
@@ -51,28 +99,32 @@ const YouTubePlayer = ({ videoId }) => {
     const onPlayerReady = () => {
         setIsPlayerReady(true);
         const duration = playerRef.current.getDuration();
-        setVideoDuration(duration);
-    };
+        setVideoDuration(duration);    };
 
     const onPlayerError = (event) => {
-        console.error('Error occurred in player:', event.data);
     };
 
     const onPlayerStateChange = (event) => {
         if (event.data === window.YT.PlayerState.PLAYING) {
             setIsPlaying(true);
-            const intervalId = setInterval(() => {
+            intervalRef.current = setInterval(() => {
                 if (playerRef.current) {
                     const time = playerRef.current.getCurrentTime();
                     setCurrentTime(time);
                 }
             }, 1000);
-            return () => clearInterval(intervalId);
         } else {
+            clearInterval(intervalRef.current);
             setIsPlaying(false);
         }
     };
 
+    const playVideo = () => {
+        if (isPlayerReady && playerRef.current) {
+            console.log("Playing video...");
+            playerRef.current.playVideo();
+        }
+    };
     const togglePlay = () => {
         if (isPlayerReady && playerRef.current) {
             if (isPlaying) {
@@ -84,71 +136,76 @@ const YouTubePlayer = ({ videoId }) => {
     };
 
     const handleProgressChange = (event) => {
-        const newTime = (event.target.value / 100) * videoDuration;
+        const newTime = (event.target.value / 100) * (playerRef.current?.getDuration() || 0);
         if (isPlayerReady && playerRef.current) {
             playerRef.current.seekTo(newTime);
             setCurrentTime(newTime);
+            console.log("Seeking to time:", newTime);
         }
     };
 
-    // Inline styles
-    const styles = {
-        playerContainer: {
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            margin: 'auto',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'flex-start', // Align items to the top
-            alignItems: 'center',
-            overflow: 'hidden', // Prevent overflow
-        },
-        controls: {
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right:0,
-            bottom:0,
-
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-        },
-        progressBar: {
-            position:'absolute',
-            top:0,
-            width: '90%',
-            height: '2px', // Set height of the progress bar
-            cursor: 'pointer',
-            backgroundColor: '#fff', // Optional: color for the progress bar
-        },
-    };
-
     return (
-        <div ref={containerRef} style={styles.playerContainer} onClick={togglePlay}>
+        <div  ref={containerRef} style={playerContainer} onClick={togglePlay}>
             <div id="player" style={{
-            height: '100%', 
             aspectRatio: '16 / 9', 
             height:maxWidth?'auto':'100%',
-            width:maxWidth?'100%':'auto'
+            width:maxWidth?'100%':'auto',
+            maxHeight:'100%',
+            maxWidth:'100%',
             
         }}></div>
-            <div style={styles.controls}>
-                <input  
-                    type="range" 
-                    min="0" 
-                    max="100" 
-                    value={videoDuration ? (currentTime / videoDuration) * 100 : 0}
-                    onChange={handleProgressChange} 
-                    style={styles.progressBar} 
-                />
+            <div style={maskStyle}>
             </div>
         </div>
     );
+};
+
+const playerContainer= {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+
+    overflow: 'hidden', // Prevent overflow
+}
+// Inline styles
+const maskStyle = {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0)', // Semi-transparent black
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+};
+
+const buttonContainerStyle = {
+    position: 'absolute',
+    top: '10px',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    display: 'flex',
+    justifyContent: 'space-around',
+    width: '100%',
+};
+
+const buttonStyle = {
+    padding: '10px 15px',
+    margin: '5px',
+    fontSize: '16px',
+    cursor: 'pointer',
+    backgroundColor: '#007bff',
+    color: 'white',
+    border: 'none',
+    borderRadius: '5px',
+};
+
+const progressBarStyle = {
+    width: '90%',
+    marginTop: '20px',
 };
 
 export default YouTubePlayer;
