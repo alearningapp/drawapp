@@ -13,7 +13,7 @@ const YouTubePlayer = ({ item }) => {
     const [playerDimensions, setPlayerDimensions] = useState({ height: 0, width: 0 });
 
     useEffect(()=>{
-        fetch('/api/video/'+encodeURIComponent(item.text)+".json").then(r=>r.json()).then(r=>{
+        item?.text&&fetch('/api/video/'+encodeURIComponent(item.text)+".json").then(r=>r.json()).then(r=>{
             setVideoId(r[0].id)
         })
        
