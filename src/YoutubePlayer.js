@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-const YouTubePlayer = ({ videoId }) => {
+const YouTubePlayer = ({ item }) => {
     const playerRef = useRef(null);
     const containerRef = useRef(null);
-    
+    const [videoId,setVideoId] = useState(null);
     const [isPlayerReady, setIsPlayerReady] = useState(false);
     const [videoDuration, setVideoDuration] = useState(0);
     const [currentTime, setCurrentTime] = useState(0);
@@ -12,6 +12,14 @@ const YouTubePlayer = ({ videoId }) => {
     const [maxWidth, setMaxWidth] = useState(false);
     const [playerDimensions, setPlayerDimensions] = useState({ height: 0, width: 0 });
 
+    useEffect(()=>{
+        console.log(item)
+        fetch('/api/video/'+encodeURIComponent(item.text)+".json").then(r=>r.json()).then(r=>{
+            setVideoId(r[0].id)
+        })
+       
+        
+    },[item])
 
     useEffect(() => {
         // Load YouTube IFrame API only once

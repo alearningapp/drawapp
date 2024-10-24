@@ -9,6 +9,7 @@ import WordTrack from "./WordTrack";
 import SvgEditPlayer from "./SvgEdit2/SvgPlayer";
 import ModeSwitchButton from './ModeSwitchButton';
 import YoutubePlayer from './YoutubePlayer';
+import BilibiliVideo from './BilibiliVideo';
 
 
 const Draw = () => {
@@ -211,10 +212,12 @@ const Draw = () => {
         </div>
         <div id="right" style={{flexGrow:1,display:'flex',marginLeft:'30px',position:'relative'}}>
           <div className="svg-wrapper" style={{border:'1px solid #ccc',position:'absolute',left:0,right:0,top:0,bottom:0,overflow:'hidden'}}>
-           {settings.currentMode=='Video'&&<YoutubePlayer videoId="EOX784OXmPs" />}
+           { settings.currentMode=='Video'&&<YoutubePlayer  item={item}/>}
+
             {(false &&<SvgEditPlayer/>)}
+
             <TextList setText={drawText} />
-            <WordTrack item={item} />
+            { settings.currentMode=='Track'&&<WordTrack item={item} />}
             <svg
               ref={svgRef}
               className="svg"
@@ -236,7 +239,7 @@ const Draw = () => {
                 fill="black"
                 fontSize="100"
               >
-                {item.text}
+               
               </text>}
               {drawElements()}
             </svg>

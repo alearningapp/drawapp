@@ -15,7 +15,10 @@ const ModeSwitchButton = ({ settings, setSettings }) => {
       setSettings((prev) => ({ ...prev, drawEnabled: !prev.drawEnabled }));
     } else {
       // Change current mode for other buttons
-      setSettings((prev) => ({ ...prev, currentMode: mode.name }));
+      setSettings((prev) => { 
+        if(prev.currentMode==mode.name)return { ...prev, currentMode: '' }
+        else return { ...prev, currentMode: mode.name }
+      });
     }
   };
 
@@ -41,7 +44,7 @@ const ModeSwitchButton = ({ settings, setSettings }) => {
           key={index}
           style={{
             ...styles.button,
-            backgroundColor: mode.name === settings.currentMode.name ? '#388E3C' : '#4CAF50', // Highlight selected mode
+            backgroundColor: mode.name === settings.currentMode ? '#388E3C' : '#4CAF50', // Highlight selected mode
           }}
           onClick={() => handleButtonClick(mode)}
         >
