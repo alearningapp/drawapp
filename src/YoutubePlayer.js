@@ -13,7 +13,6 @@ const YouTubePlayer = ({ item }) => {
     const [playerDimensions, setPlayerDimensions] = useState({ height: 0, width: 0 });
 
     useEffect(()=>{
-        console.log(item)
         fetch('/api/video/'+encodeURIComponent(item.text)+".json").then(r=>r.json()).then(r=>{
             setVideoId(r[0].id)
         })
@@ -58,7 +57,6 @@ const YouTubePlayer = ({ item }) => {
             width = containerRef.current.clientHeight*16/9;
         }
 
-       console.log(width,height)
 
         playerRef.current = new window.YT.Player('player', {
             height: height,
@@ -73,11 +71,9 @@ const YouTubePlayer = ({ item }) => {
     };
 
     const cleanupPlayer = () => {
-        console.log("Cleaning up YouTube player...");
         if (playerRef.current) {
             playerRef.current.destroy();
             playerRef.current = null;
-            console.log("Player destroyed.");
         }
         if (intervalRef.current) {
             clearInterval(intervalRef.current);
@@ -90,8 +86,6 @@ const YouTubePlayer = ({ item }) => {
         const handleResize = () => {
             const newWidth = containerRef.current.clientHeight;
             const newHeight = newWidth * (9 / 16); 
-            console.log(newHeight)
-            console.log(containerRef.current.clientWidth,containerRef.current.clientHeight,containerRef.current.clientWidth/containerRef.current.clientHeight<=16/9)
             setMaxWidth(containerRef.current.clientWidth/containerRef.current.clientHeight<=16/9);
             setPlayerDimensions({ height: newHeight, width: newWidth });
         };
@@ -119,7 +113,6 @@ const YouTubePlayer = ({ item }) => {
             intervalRef.current = setInterval(() => {
                 if (playerRef.current) {
                     const time = playerRef.current.getCurrentTime();
-                    console.log(time)
                     setCurrentTime(time);
                     const duration = playerRef.current.getDuration();
                     setVideoDuration(duration); 

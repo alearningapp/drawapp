@@ -101,10 +101,17 @@ const Draw = () => {
     const rect = svgRef.current.getBoundingClientRect();
     const scaleX = svgRef.current.clientWidth / rect.width;
     const scaleY = svgRef.current.clientHeight / rect.height;
-    const x = (e.clientX - rect.left) * scaleX;
-    const y = (e.clientY - rect.top) * scaleY;
+    let x, y;
+    if (e.touches) {
+        const touch = e.touches[0];
+        x = (touch.clientX - rect.left) * scaleX;
+        y = (touch.clientY - rect.top) * scaleY;
+    } else {
+        x = (e.clientX - rect.left) * scaleX;
+        y = (e.clientY - rect.top) * scaleY;
+    }
     return { offsetX: x, offsetY: y };
-  };
+};
 
   const saveAction = (newAction) => {
     actions.current.splice(currentIndexRef.current + 1);
