@@ -143,10 +143,10 @@ const Draw = () => {
     } else {
       // Restore all elements without animation
       setSvgElements([]);
-      actions.current.forEach((action) => {
+      actions.current.slice(0,currentIndexRef.current+1).forEach((action) => {
         setSvgElements((prev) => [
           ...prev,
-          { type: "polyline", points: action.points, color: action.color,penWidth:action.penWidth,   opacity:action.opacity },
+          { type: "polyline", points: action.points, color: action.color,penWidth:action.penWidth,   opacity:action.opacity  },
         ]);
       });
     }
