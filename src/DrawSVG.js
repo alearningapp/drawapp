@@ -128,7 +128,12 @@ const Draw = () => {
           curPoints.push(point);
           setSvgElements((prev) => [
             ...prev,
-            { type: "polyline", points: curPoints, color: action.color,penType:action.penType,penWidth:action.penWidth },
+            { type: "polyline", points: curPoints, 
+              color: action.color,
+              penType:action.penType,
+              penWidth:action.penWidth, 
+              opacity:action.opacity
+            },
           ]);
           await sleep(50); // Adjust timing as needed
         }
@@ -141,7 +146,7 @@ const Draw = () => {
       actions.current.forEach((action) => {
         setSvgElements((prev) => [
           ...prev,
-          { type: "polyline", points: action.points, color: action.color,penWidth:action.penWidth },
+          { type: "polyline", points: action.points, color: action.color,penWidth:action.penWidth,   opacity:action.opacity },
         ]);
       });
     }
