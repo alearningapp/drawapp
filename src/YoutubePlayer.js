@@ -107,7 +107,8 @@ const YouTubePlayer = ({ item }) => {
     const onPlayerReady = () => {
         setIsPlayerReady(true);
         const duration = playerRef.current.getDuration();
-        setVideoDuration(duration);    };
+        setVideoDuration(duration);   
+     };
 
     const onPlayerError = (event) => {
     };
@@ -120,11 +121,21 @@ const YouTubePlayer = ({ item }) => {
                     const time = playerRef.current.getCurrentTime();
                     console.log(time)
                     setCurrentTime(time);
+                    const duration = playerRef.current.getDuration();
+                    setVideoDuration(duration); 
                 }
             }, 1000);
         } else {
             clearInterval(intervalRef.current);
             setIsPlaying(false);
+
+            if (event.data === window.YT.PlayerState.ENDED) {
+                // Video has ended
+                console.log("Video has ended.");
+                playerRef.current.seekTo(0);
+                setCurrentTime(0); // Reset current time
+                // You can perform more actions here, like notifying the user or looping the video.
+            }
         }
     };
 
