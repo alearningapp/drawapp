@@ -9,7 +9,6 @@ import WordTrack from "./WordTrack";
 import SvgEditPlayer from "./SvgEdit2/SvgPlayer";
 import ModeSwitchButton from './ModeSwitchButton';
 import YoutubePlayer from './YoutubePlayer';
-import BilibiliVideo from './BilibiliVideo';
 
 
 const Draw = () => {
@@ -32,6 +31,15 @@ const Draw = () => {
   const [isReplaying, setIsReplaying] = useState(false);
   const [item, setItem] = useState(null);
 
+  const [penType, setPenType] = useState('solid');
+
+  useEffect(()=>{
+    settingRef.current.color=selectedColor;
+    settingRef.current.penWidth=penWidth
+    settingRef.current.opacity=opacity
+    
+  },[opacity,selectedColor,penWidth])
+
   const startDrawing = useCallback((e) => {
     e.preventDefault();
     isDrawingRef.current = true;
@@ -39,10 +47,17 @@ const Draw = () => {
     settingRef.current.points = [
       { x: parseInt(offsetX), y: parseInt(offsetY) },
     ];
-    setSvgElements((prev) => [
-      ...prev,
-      { type: "polyline", points: settingRef.current.points },
-    ]);
+    setSvgElements((prev) =>{
+      let ret= [
+        ...prev,
+        { type: "polyline", 
+          points: settingRef.current.points,
+          color:settingRef.current.color,
+          opacity:settingRef.current.opacity,
+          penWidth:settingRef.current.penWidth },
+      ];
+      return ret;
+    });
   }, []);
 
   const moveDraw = useCallback((e) => {
@@ -73,10 +88,10 @@ const Draw = () => {
     if (!isDrawingRef.current) return;
     isDrawingRef.current = false;
     const newAction = {
-      color: selectedColor,
+      color: settingRef.current.color,
       points: settingRef.current.points,
-      width: penWidth,
-      opacity: opacity,
+      penWidth: settingRef.current.penWidth,
+      opacity:settingRef.current. opacity,
     };
     saveAction(newAction);
     settingRef.current.points = [];
@@ -108,12 +123,12 @@ const Draw = () => {
       for (let i = 0; i < actions.current.length; i++) {
         const action = actions.current[i];
         const curPoints = [];
-
+        console.log(action);
         for (const point of action.points) {
           curPoints.push(point);
           setSvgElements((prev) => [
             ...prev,
-            { type: "polyline", points: curPoints, color: action.color },
+            { type: "polyline", points: curPoints, color: action.color,penType:action.penType,penWidth:action.penWidth },
           ]);
           await sleep(50); // Adjust timing as needed
         }
@@ -126,7 +141,7 @@ const Draw = () => {
       actions.current.forEach((action) => {
         setSvgElements((prev) => [
           ...prev,
-          { type: "polyline", points: action.points, color: action.color },
+          { type: "polyline", points: action.points, color: action.color,penWidth:action.penWidth },
         ]);
       });
     }
@@ -144,10 +159,11 @@ const Draw = () => {
           <polyline
             key={index}
             points={points}
-            stroke={element.color || selectedColor}
-            strokeWidth={penWidth}
+            stroke={element.color }
+            strokeWidth={element.penWidth}
             fill="none"
-            opacity={opacity}
+            opacity={element.opacity}
+            strokeLinecap="round"
           />
         );
       }
@@ -208,6 +224,8 @@ const Draw = () => {
             setPenWidth={setPenWidth}
             opacity={opacity}
             setOpacity={setOpacity}
+            penType={penType}
+            setPenType={setPenType}
           />
         </div>
         <div id="right" style={{flexGrow:1,display:'flex',marginLeft:'30px',position:'relative'}}>
