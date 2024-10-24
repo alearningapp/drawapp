@@ -235,7 +235,7 @@ const Draw = () => {
         </div>
         <div id="right" style={{flexGrow:1,display:'flex',marginLeft:'30px',position:'relative'}}>
           <div className="svg-wrapper" style={{border:'1px solid #ccc',position:'absolute',left:0,right:0,top:0,bottom:0,overflow:'hidden'}}>
-           { settings.currentMode=='Video'&&<YoutubePlayer  item={item}/>}
+           { settings.currentMode=='Video'&&<YoutubePlayer videoId={"qaWMOYf4ri8"}  item={item}/>}
 
             {(false &&<SvgEditPlayer/>)}
 

@@ -118,6 +118,7 @@ const YouTubePlayer = ({ item }) => {
             intervalRef.current = setInterval(() => {
                 if (playerRef.current) {
                     const time = playerRef.current.getCurrentTime();
+                    console.log(time)
                     setCurrentTime(time);
                 }
             }, 1000);
@@ -127,12 +128,6 @@ const YouTubePlayer = ({ item }) => {
         }
     };
 
-    const playVideo = () => {
-        if (isPlayerReady && playerRef.current) {
-            console.log("Playing video...");
-            playerRef.current.playVideo();
-        }
-    };
     const togglePlay = () => {
         if (isPlayerReady && playerRef.current) {
             if (isPlaying) {
@@ -164,10 +159,40 @@ const YouTubePlayer = ({ item }) => {
         }}></div>
             <div style={maskStyle}>
             </div>
+            <div style={controls}>
+                <input  
+                    type="range" 
+                    min="0" 
+                    max="100" 
+                    value={videoDuration ? (currentTime / videoDuration) * 100 : 0}
+                    onChange={handleProgressChange} 
+                    style={progressBar} 
+                />
+            </div>
         </div>
     );
 };
 
+const controls= {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right:0,
+    bottom:0,
+
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+}
+const progressBar= {
+    position:'absolute',
+    bottom:'2px',
+    width: '90%',
+    height: '2px', // Set height of the progress bar
+    cursor: 'pointer',
+    backgroundColor: '#fff', // Optional: color for the progress bar
+}
 const playerContainer= {
     position: 'absolute',
     top: 0,
