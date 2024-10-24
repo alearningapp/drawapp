@@ -210,7 +210,10 @@ const playerContainer= {
     left: 0,
     right: 0,
     bottom: 0,
-
+    overflow: "hidden",
+    aspectRatio: "16/9",
+    maxWidth:"100%",
+    maxHeight: "100%",
     overflow: 'hidden', // Prevent overflow
 }
 // Inline styles
